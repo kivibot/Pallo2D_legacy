@@ -1,0 +1,7 @@
+{
+	"version": 1,
+	"type": "shader",
+	"name": "shader0",
+	"vertex": "shader0.vert",
+	"fragment": "shader0.frag"
+}
