@@ -11,6 +11,8 @@ package fi.kivibot.pallo.render;
  */
 public class Material {
 
+    public static final Material DEFAULT = new Material("DEFAULT",Texture.DEFAULT,Shader.DEFAULT);
+    
     private Texture diffuse;
     private Shader shader;
     private String name;

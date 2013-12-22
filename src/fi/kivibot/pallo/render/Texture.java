@@ -11,6 +11,8 @@ package fi.kivibot.pallo.render;
  */
 public class Texture {
 
+    public static Texture DEFAULT = new Texture("DEFAULT",0);
+    
     private static int tnamid = 0;
 
     private int id;
@@ -28,10 +30,7 @@ public class Texture {
     public int getID() {
         return id;
     }
-
-    public void bind() {
-    }
-
+    
     @Override
     public String toString() {
         return "Texture{ name: " + name + ", id: " + id + " }";

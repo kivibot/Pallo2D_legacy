@@ -8,14 +8,18 @@ package fi.kivibot.pallo;
 import fi.kivibot.engine.game.GameObject;
 import fi.kivibot.misc.FPSCounter;
 import fi.kivibot.misc.Node;
+import fi.kivibot.pallo.assets.AssetManager;
 import fi.kivibot.pallo.render.RenderAble;
+import fi.kivibot.pallo.render.Renderer;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.lwjgl.LWJGLException;
+import org.lwjgl.opengl.ContextAttribs;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
+import org.lwjgl.opengl.PixelFormat;
 
 /**
  *
@@ -25,7 +29,8 @@ public abstract class PalloApp {
 
     private boolean running = true;
     private int frame_rate = 120;
-    private FPSCounter fps = new FPSCounter(frame_rate/2);
+    private FPSCounter fps = new FPSCounter(frame_rate / 2);
+    private Renderer renderer = new Renderer();
 
     protected Node rootNode = new Node();
 
@@ -36,9 +41,10 @@ public abstract class PalloApp {
     public void start() {
         initDisplay(800, 600);
         initOGL();
+        Init();
         do {
             fps.update();
-            Display.setTitle("FPS: " + fps.getFrameRate()+" ("+fps.getAverageTime()+"ms)");
+            Display.setTitle("FPS: " + fps.getFrameRate() + " (" + fps.getAverageTime() + "ms) " + AssetManager.status());
         } while (loop());
         cleanUp();
     }
@@ -50,7 +56,7 @@ public abstract class PalloApp {
     private boolean initDisplay(int w, int h) {
         try {
             Display.setDisplayMode(new DisplayMode(w, h));
-            Display.create();
+            Display.create(new PixelFormat(), new ContextAttribs(3, 1).withForwardCompatible(false));
         } catch (LWJGLException ex) {
             Logger.getLogger(PalloApp.class.getName()).log(Level.SEVERE, null, ex);
             return false;
@@ -91,7 +97,7 @@ public abstract class PalloApp {
     }
 
     private void handleRendering() {
-        
+        renderer.renderTree(rootNode);
     }
 
     private void cleanUp() {

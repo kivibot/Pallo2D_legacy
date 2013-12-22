@@ -20,6 +20,8 @@ import org.lwjgl.opengl.GL30;
 public class Renderer {
 
     public void renderTree(Node n_) {
+        GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
+        
         Queue<Node> q = new LinkedList<>();
         q.add(n_);
         Node c;
@@ -39,24 +41,23 @@ public class Renderer {
 
     private void renderSpatial(Spatial s) {
         Material mat = s.getMaterial();
-        mat.getDiffuseMap().bind();
-        mat.getShader().bind();
 
+        
         // Bind to the VAO that has all the information about the vertices
         GL30.glBindVertexArray(s.getMesh().getVertexArrayID());
         GL20.glEnableVertexAttribArray(0);
 
         // Bind to the index VBO that has all the information about the order of the vertices
-        GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, s.getMesh().getVerticeBufferID());
+        GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, s.getMesh().getIndiceBufferID());
 
         // Draw the vertices
-        GL11.glDrawElements(GL11.GL_TRIANGLES, s.getMesh().getIndiceBufferID(), GL11.GL_UNSIGNED_BYTE, 0);
+        GL11.glDrawElements(GL11.GL_TRIANGLES, 6, GL11.GL_UNSIGNED_INT, 0);
 
         // Put everything back to default (deselect)
         GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, 0);
         GL20.glDisableVertexAttribArray(0);
         GL30.glBindVertexArray(0);
-
+        
     }
 
 }

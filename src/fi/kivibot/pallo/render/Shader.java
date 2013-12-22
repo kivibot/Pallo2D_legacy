@@ -25,9 +25,6 @@ public class Shader {
         return id;
     }
 
-    public void bind() {
-    }
-
     @Override
     public String toString() {
         return "Shader{ name: " + name + ", id: " + id + " }";
