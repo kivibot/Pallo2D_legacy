@@ -101,6 +101,9 @@ public class AssetManager {
                 GL20.glAttachShader(sid, ve.intValue());
                 GL20.glAttachShader(sid, fr.intValue());
 
+                GL20.glBindAttribLocation(sid, 0, "in_Position");
+                GL20.glBindAttribLocation(sid, 1, "in_Texcoord");
+                
                 GL20.glLinkProgram(sid);
                 GL20.glValidateProgram(sid);
 

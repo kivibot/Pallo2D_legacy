@@ -19,6 +19,8 @@ import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.ContextAttribs;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.PixelFormat;
 
 /**
@@ -44,7 +46,9 @@ public abstract class PalloApp {
         Init();
         do {
             fps.update();
-            Display.setTitle("FPS: " + fps.getFrameRate() + " (" + fps.getAverageTime() + "ms) " + AssetManager.status());
+            Display.setTitle("FPS: " + fps.getFrameRate() + " ("
+                    + fps.getAverageTime() + "ms) " + AssetManager.status()
+                    + ", " + renderer.status());
         } while (loop());
         cleanUp();
     }
@@ -56,7 +60,7 @@ public abstract class PalloApp {
     private boolean initDisplay(int w, int h) {
         try {
             Display.setDisplayMode(new DisplayMode(w, h));
-            Display.create(new PixelFormat(), new ContextAttribs(3, 1).withForwardCompatible(false));
+            Display.create(new PixelFormat(), new ContextAttribs(3, 2).withForwardCompatible(false).withProfileCore(true));
         } catch (LWJGLException ex) {
             Logger.getLogger(PalloApp.class.getName()).log(Level.SEVERE, null, ex);
             return false;
@@ -65,14 +69,17 @@ public abstract class PalloApp {
     }
 
     private void initOGL() {
+
+        GL11.glEnable(GL11.GL_TEXTURE_2D);
     }
 
     private boolean loop() {
         handleEvents();
         this.handleGameLogic();
+        this.Update();
         handleRendering();
         Display.update();
-        Display.sync(frame_rate);
+        //   Display.sync(frame_rate);
         return running;
     }
 

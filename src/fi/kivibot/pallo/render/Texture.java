@@ -9,13 +9,12 @@ package fi.kivibot.pallo.render;
  *
  * @author kivi
  */
-public class Texture {
+public class Texture extends GLObject{
 
     public static Texture DEFAULT = new Texture("DEFAULT",0);
     
     private static int tnamid = 0;
 
-    private int id;
     private String name;
 
     public Texture(int id) {
@@ -23,17 +22,13 @@ public class Texture {
     }
 
     public Texture(String name, int id) {
-        this.id = id;
+        this.setID(id);
         this.name = name;
-    }
-
-    public int getID() {
-        return id;
     }
     
     @Override
     public String toString() {
-        return "Texture{ name: " + name + ", id: " + id + " }";
+        return "Texture{ name: " + name + ", id: " + this.getID() + " }";
     }
 
 }

@@ -5,22 +5,34 @@
  */
 package fi.kivibot.pallo.render;
 
+import java.util.ArrayList;
+import java.util.List;
+import org.lwjgl.util.vector.Vector2f;
+
 /**
  *
  * @author kivi
  */
-public class FBO {
+public class FBO extends GLObject {
 
-    private int id;
+    private VertexBuffer targets = new VertexBuffer(VertexBuffer.Type.Integer, VertexBuffer.Usage.Static);
+    private List<Texture> textures = new ArrayList<>();
+    private Vector2f dim;
 
-    public FBO(int id) {
-        this.id = id;
+    public FBO(int w, int h) {
+        dim = new Vector2f(w, h);
     }
 
-    public int getID() {
-        return id;
+    public List<Texture> getTextureList() {
+        return textures;
     }
 
-    public void bind() {
+    public VertexBuffer getTargetBuffer() {
+        return targets;
     }
+
+    public Vector2f getDimensions() {
+        return dim;
+    }
+
 }

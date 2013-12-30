@@ -5,6 +5,7 @@
  */
 package fi.kivibot.pallo.render;
 
+import fi.kivibot.math.Rect;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -18,79 +19,98 @@ import org.lwjgl.opengl.GL30;
  *
  * @author kivi
  */
-public class Mesh {
+public class Mesh extends GLObject {
 
-    private FloatBuffer vertices, texcoords;
-    private IntBuffer indices;
-    
-    private int vid, iid, tcid, vaoid;
+    private FloatBuffer ve, te;
+    private IntBuffer ib;
 
-    public Mesh(float[] v_, int[] ind, float[] tc) {
+    private VertexBuffer vertices, texcoords, indices;
 
-        float[] v = new float[(int) (v_.length * 1.5)];
-        int j = 0;
-        for (int i = 0; i < v_.length; i += 2) {
-            v[j++] = v_[i];
-            v[j++] = v_[i+1];
-            v[j++] = 0;
-        }
+    private Rect b;
 
-        vertices = BufferUtils.createFloatBuffer(v.length);
-        indices = BufferUtils.createIntBuffer(ind.length);
-        texcoords = BufferUtils.createFloatBuffer(tc.length);
-
-        vertices.put(v);
-        vertices.flip();
-        indices.put(ind);
-        indices.flip();
-        texcoords.put(tc);
-        texcoords.flip();
-        
-        vaoid = GL30.glGenVertexArrays();
-        GL30.glBindVertexArray(vaoid);
-        
-        vid = GL15.glGenBuffers();
-        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vid);
-        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, vertices, GL15.GL_STATIC_DRAW);
-        GL20.glVertexAttribPointer(0, 3, GL11.GL_FLOAT, false, 0, 0);
-        
-        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
-        GL30.glBindVertexArray(0);
-        
-        iid = GL15.glGenBuffers();
-        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, iid);
-        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, indices, GL15.GL_STATIC_DRAW);
-        
-        GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, 0);
-
+    public Mesh(VertexBuffer v, VertexBuffer t, VertexBuffer i) {
+        vertices = v;
+        texcoords = t;
+        indices = i;
     }
 
-    public int getVerticeBufferID() {
-        return vid;
+    public Mesh(float[] v, int[] ind, float[] tc) {
+
+        ve = BufferUtils.createFloatBuffer(v.length);
+        ib = BufferUtils.createIntBuffer(ind.length);
+        te = BufferUtils.createFloatBuffer(tc.length);
+
+        ve.put(v);
+        ve.flip();
+        ib.put(ind);
+        ib.flip();
+        te.put(tc);
+        te.flip();
+
+        vertices = new VertexBuffer(VertexBuffer.Type.Float, VertexBuffer.Usage.Dynamic);
+        vertices.setData(ve);
+
+        texcoords = new VertexBuffer(VertexBuffer.Type.Float, VertexBuffer.Usage.Dynamic);
+        texcoords.setData(te);
+
+        indices = new VertexBuffer(VertexBuffer.Type.Integer, VertexBuffer.Usage.Dynamic);
+        indices.setData(ib);
     }
 
-    public int getIndiceBufferID() {
-        return iid;
-    }
-
-    public int getTextureCoordBufferID() {
-        return tcid;
-    }
-
-    public int getVertexArrayID() {
-        return vaoid;
-    }
-
-    public FloatBuffer getVerticeBuffer() {
+    public VertexBuffer getVerticeBuffer() {
         return vertices;
     }
 
-    public IntBuffer getIndiceBuffer() {
+    public VertexBuffer getIndiceBuffer() {
         return indices;
     }
 
-    public FloatBuffer getTexCoordsBuffer() {
+    public VertexBuffer getTexCoordsBuffer() {
         return texcoords;
+    }
+
+    public Rect getBoundingBox() {
+        if (this.getVerticeBuffer().updateNeeded()) {
+            b = this.calcBoundingBox();
+        }
+        return this.b;
+    }
+
+    private Rect calcBoundingBox() {
+        float mix = 99999, miy = 99999, max = -99999, may = -99999;
+
+        for (int i = 0; i < vertices.getData().capacity(); i += 2) {
+            float x = ((FloatBuffer) vertices.getData()).get(i);
+            float y = ((FloatBuffer) vertices.getData()).get(i + 1);
+
+            if (x < mix) {
+                mix = x;
+            }
+            if (x > max) {
+                max = x;
+            }
+            if (y < miy) {
+                miy = y;
+            }
+            if (y > may) {
+                may = y;
+            }
+        }
+
+        return new Rect(mix, miy, max - mix, may - miy);
+    }
+
+    @Override
+    public Mesh clone() {
+        return new Mesh(vertices.clone(), texcoords.clone(), indices.clone());
+    }
+
+    @Override
+    public String toString() {
+        return "Mesh\n\tid: " + this.getID()
+                + "\n\t" + "Vertices: " + vertices
+                + "\n\tTexcoords: " + texcoords
+                + "\n\tIndices: " + indices;
     }
 
 }

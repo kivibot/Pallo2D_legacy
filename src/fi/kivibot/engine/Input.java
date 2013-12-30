@@ -5,7 +5,7 @@
  */
 package fi.kivibot.engine;
 
-import fi.kivibot.math.Vector2;
+import org.lwjgl.util.vector.Vector2f;
 
 /**
  *
@@ -13,7 +13,7 @@ import fi.kivibot.math.Vector2;
  */
 public class Input {
     
-    public static Vector2 getMousePosition(){
+    public static Vector2f getMousePosition(){
         return null;
     }
     
