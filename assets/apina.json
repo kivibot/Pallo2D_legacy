@@ -1,0 +1,8 @@
+{
+	"version": 2,
+	"type": "material",
+	"name": "apina",
+	"diffuse": "kapinaapina",
+	"normal": "monkeynormal",
+	"shader": "shader1",
+}

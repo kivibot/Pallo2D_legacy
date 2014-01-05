@@ -9,6 +9,7 @@ import fi.kivibot.math.Transform;
 import java.util.ArrayList;
 import java.util.List;
 import org.lwjgl.util.vector.Vector2f;
+import org.lwjgl.util.vector.Vector3f;
 
 /**
  *
@@ -21,7 +22,7 @@ public class Node {
     private Transform t;
 
     public Node() {
-        this(new Transform(new Vector2f(0, 0)));
+        this(new Transform(new Vector3f(0, 0, 0)));
     }
 
     public Node(Transform tr) {

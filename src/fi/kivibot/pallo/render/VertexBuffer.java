@@ -15,6 +15,11 @@ import java.nio.IntBuffer;
  */
 public class VertexBuffer extends GLObject implements Cloneable {
 
+    public static enum Target {
+
+        Vertex, Index, Uniform
+    }
+
     public static enum Usage {
 
         Static, Dynamic, Stream
@@ -30,10 +35,16 @@ public class VertexBuffer extends GLObject implements Cloneable {
     private boolean dataChanged;
     private Usage usage;
     private Type type;
+    private Target target;
 
     public VertexBuffer(Type t, Usage u) {
+        this(t, u, Target.Vertex);
+    }
+
+    public VertexBuffer(Type t, Usage u, Target ta) {
         this.usage = u;
         this.type = t;
+        this.target = ta;
     }
 
     public boolean hasSizeChanged() {
@@ -85,9 +96,13 @@ public class VertexBuffer extends GLObject implements Cloneable {
         return this.type;
     }
 
+    public Target getTarget() {
+        return target;
+    }
+
     @Override
     public VertexBuffer clone() {
-        VertexBuffer vb = new VertexBuffer(type, usage);
+        VertexBuffer vb = new VertexBuffer(type, usage, target);
         vb.setData(data);
         return vb;
     }

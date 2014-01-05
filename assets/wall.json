@@ -1,0 +1,8 @@
+{
+	"version": 2,
+	"type": "material",
+	"name": "wall",
+	"diffuse": "WornBrownBrickwork-ColorMap",
+	"normal": "WornBrownBrickwork-NormalMap",
+	"shader": "shader1",
+}

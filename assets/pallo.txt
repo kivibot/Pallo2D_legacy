@@ -1,0 +1,2 @@
+pallo2D dev log performance
+02.01.14	60fps	44729 vertices	~2k sprites	11 lights	800x600

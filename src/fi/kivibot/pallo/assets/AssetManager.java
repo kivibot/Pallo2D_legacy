@@ -23,6 +23,7 @@ import java.util.Queue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
@@ -45,7 +46,7 @@ public class AssetManager {
 
     private static final HashMap<String, InputStream> tex_stream = new HashMap<>();
 
-    private static final int minVer = 1, maxVer = 1;
+    private static final int minVer = 1, maxVer = 3;
 
     public static void addFile(File f) {
         if (f.isDirectory()) {
@@ -54,10 +55,15 @@ public class AssetManager {
 
         if (f.getName().endsWith(".json")) {
             processJSON(new JSONObject(readFileToString(f)));
+            System.out.println("loaded " + f);
         } else if (f.getName().endsWith(".png")) {
             loadAsTexture(f);
+            System.out.println("loaded " + f);
         } else if (f.getName().endsWith(".glsl")) {
             loadShader(readFileToString(f), f.getName().split("\\.")[0], f.getName().split("\\.")[1]);
+            System.out.println("loaded " + f);
+        } else {
+            System.out.println("did not load " + f);
         }
     }
 
@@ -92,24 +98,37 @@ public class AssetManager {
         } else {
             //try to make
             JSONObject jso = shader_prog.get(key);
+            if (jso != null) {
+                Integer ve = shader_part.get(jso.getString("vertex"));
+                Integer fr = shader_part.get(jso.getString("fragment"));
+                if (ve != null && fr != null) {
+                    int sid = GL20.glCreateProgram();
 
-            Integer ve = shader_part.get(jso.getString("vertex"));
-            Integer fr = shader_part.get(jso.getString("fragment"));
-            if (ve != null && fr != null) {
-                int sid = GL20.glCreateProgram();
+                    GL20.glAttachShader(sid, ve.intValue());
+                    GL20.glAttachShader(sid, fr.intValue());
 
-                GL20.glAttachShader(sid, ve.intValue());
-                GL20.glAttachShader(sid, fr.intValue());
+                    if (jso.getInt("version") >= 3) {
+                        JSONArray jsa = jso.getJSONArray("varloc");
+                        for (int i = 0; i < jsa.length(); i++) {
+                            JSONObject vlo = jsa.getJSONObject(i);
+                            String name = vlo.getString("name");
+                            int id = vlo.getInt("id");
+                            String typ = vlo.getString("type");
+                            switch (typ) {
+                                case "frag":
+                                    GL30.glBindFragDataLocation(sid, id, name);
+                                    break;
+                            }
+                        }
+                    }
 
-                GL20.glBindAttribLocation(sid, 0, "in_Position");
-                GL20.glBindAttribLocation(sid, 1, "in_Texcoord");
-                
-                GL20.glLinkProgram(sid);
-                GL20.glValidateProgram(sid);
+                    GL20.glLinkProgram(sid);
+                    GL20.glValidateProgram(sid);
 
-                s = new Shader(key, sid);
-                shaders.put(key, s);
-                return s;
+                    s = new Shader(key, sid);
+                    shaders.put(key, s);
+                    return s;
+                }
             }
 
         }
@@ -122,8 +141,16 @@ public class AssetManager {
             return Material.DEFAULT;
         }
         Texture diffuse = getTexture(jso.getString("diffuse"));
+        Texture normal = Texture.DEFAULT;
+        Texture gloss = Texture.DEFAULT;
+        if (jso.getInt("version") >= 2) {
+            normal = getTexture(jso.getString("normal"));
+        }
+        if (jso.getInt("version") >= 3) {
+            gloss = getTexture(jso.getString("gloss"));
+        }
         Shader shader = getShader(jso.getString("shader"));
-        Material mat = new Material(key, diffuse, shader);
+        Material mat = new Material(key, diffuse, normal, gloss, shader);
         return mat;
     }
 
@@ -148,9 +175,12 @@ public class AssetManager {
             String ln;
             while ((ln = in.readLine()) != null) {
                 file += ln + "\n";
+
             }
         } catch (IOException ex) {
-            Logger.getLogger(AssetManager.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(AssetManager.class
+                    .getName()).log(Level.SEVERE, null, ex);
+
             return "";
         }
         return file;
@@ -159,8 +189,10 @@ public class AssetManager {
     private static void loadAsTexture(File f) {
         try {
             tex_stream.put(f.getName().split("\\.")[0], new FileInputStream(f));
+
         } catch (FileNotFoundException ex) {
-            Logger.getLogger(AssetManager.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(AssetManager.class
+                    .getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -209,8 +241,17 @@ public class AssetManager {
         }
         GL20.glShaderSource(sid, raw);
         GL20.glCompileShader(sid);
-        if (GL20.glGetShader(sid, GL20.GL_COMPILE_STATUS) == GL11.GL_FALSE) {
-            System.err.println("Could not compile shader.");
+        int err = GL20.glGetShaderi(sid, GL20.GL_COMPILE_STATUS);
+        if (err == GL11.GL_FALSE) {
+            int ls = GL20.glGetShaderi(sid, GL20.GL_INFO_LOG_LENGTH);
+            String str = GL20.glGetShaderInfoLog(sid, ls);
+            System.out.println(">>error");
+            System.err.println(str);
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(AssetManager.class.getName()).log(Level.SEVERE, null, ex);
+            }
             return;
         }
         shader_part.put(name + "." + type, new Integer(sid));
@@ -226,8 +267,10 @@ public class AssetManager {
         try {
             BufferedImage buf = ImageIO.read(is);
             return loadTex(buf, name);
+
         } catch (IOException ex) {
-            Logger.getLogger(AssetManager.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(AssetManager.class
+                    .getName()).log(Level.SEVERE, null, ex);
         }
         return null;
     }
@@ -237,7 +280,7 @@ public class AssetManager {
         image.getRGB(0, 0, image.getWidth(), image.getHeight(), pixels, 0, image.getWidth());
 
         ByteBuffer buffer = BufferUtils.createByteBuffer(image.getWidth() * image.getHeight() * 4);
-        
+
         for (int y = 0; y < image.getHeight(); y++) {
             for (int x = 0; x < image.getWidth(); x++) {
                 int pixel = pixels[y * image.getWidth() + x];

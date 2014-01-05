@@ -1,0 +1,9 @@
+{
+	"version": 3,
+	"type": "material",
+	"name": "wall2",
+	"diffuse": "CorrugatedSharp-ColorMap",
+	"normal": "CorrugatedSharp-NormalMap",
+	"gloss": "wall2-gloss",
+	"shader": "shader1",
+}

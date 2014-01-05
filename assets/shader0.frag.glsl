@@ -7,5 +7,5 @@ in	vec2 out_Texcoord;
 out vec4 out_Color;
 
 void main(void) {
-	out_Color = texture2D(texture_diffuse, out_Texcoord);
+	out_Color = texture(texture_diffuse, out_Texcoord);
 }

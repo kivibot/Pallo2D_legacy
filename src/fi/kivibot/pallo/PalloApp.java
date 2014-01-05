@@ -32,7 +32,7 @@ public abstract class PalloApp {
     private boolean running = true;
     private int frame_rate = 120;
     private FPSCounter fps = new FPSCounter(frame_rate / 2);
-    private Renderer renderer = new Renderer();
+    private Renderer renderer;
 
     protected Node rootNode = new Node();
 
@@ -44,9 +44,10 @@ public abstract class PalloApp {
         initDisplay(800, 600);
         initOGL();
         Init();
+        this.renderer = new Renderer(800, 600);
         do {
             fps.update();
-            Display.setTitle("FPS: " + fps.getFrameRate() + " ("
+            Display.setTitle("FPS: " + (int) fps.getFrameRate() + " ("
                     + fps.getAverageTime() + "ms) " + AssetManager.status()
                     + ", " + renderer.status());
         } while (loop());
@@ -60,7 +61,7 @@ public abstract class PalloApp {
     private boolean initDisplay(int w, int h) {
         try {
             Display.setDisplayMode(new DisplayMode(w, h));
-            Display.create(new PixelFormat(), new ContextAttribs(3, 2).withForwardCompatible(false).withProfileCore(true));
+            Display.create(new PixelFormat(), new ContextAttribs(3, 1).withForwardCompatible(true));
         } catch (LWJGLException ex) {
             Logger.getLogger(PalloApp.class.getName()).log(Level.SEVERE, null, ex);
             return false;
@@ -71,6 +72,7 @@ public abstract class PalloApp {
     private void initOGL() {
 
         GL11.glEnable(GL11.GL_TEXTURE_2D);
+        GL11.glDisable(GL11.GL_DEPTH_TEST);
     }
 
     private boolean loop() {
@@ -80,6 +82,7 @@ public abstract class PalloApp {
         handleRendering();
         Display.update();
         //   Display.sync(frame_rate);
+        //   Display.sync(1);
         return running;
     }
 

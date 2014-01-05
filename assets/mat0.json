@@ -3,5 +3,5 @@
 	"type": "material",
 	"name": "mat0",
 	"diffuse": "dif0",
-	"shader": "shader0"
+	"shader": "shader1"
 }

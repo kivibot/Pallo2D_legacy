@@ -6,6 +6,7 @@
 package fi.kivibot.math;
 
 import org.lwjgl.util.vector.Vector2f;
+import org.lwjgl.util.vector.Vector3f;
 
 /**
  *
@@ -13,17 +14,17 @@ import org.lwjgl.util.vector.Vector2f;
  */
 public class Transform {
     
-    private Vector2f pos;
+    private Vector3f pos;
     
-    public Transform(Vector2f p){
+    public Transform(Vector3f p){
         pos = p;
     }
     
-    public Vector2f getPosition(){
+    public Vector3f getPosition(){
         return pos;
     }
     
-    public void setPosition(Vector2f v){
+    public void setPosition(Vector3f v){
         pos = v;
     }
     

@@ -1,0 +1,7 @@
+{
+	"version": 1,
+	"type": "shader",
+	"name": "pass2",
+	"vertex": "pass2.vert",
+	"fragment": "pass2.frag"
+}
