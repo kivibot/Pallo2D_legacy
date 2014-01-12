@@ -26,7 +26,7 @@ public class Material {
     }
 
     public Material(String n, Texture diff, Texture norm, Texture glo, Shader s) {
-        this(n, diff, norm, glo, s, 75, new Vector3f(1, 1, 1));
+        this(n, diff, norm, glo, s, 5, new Vector3f(1, 1, 1));
     }
 
     public Material(String n, Texture diff, Texture norm, Texture glo, Shader s, float sh, Vector3f spec) {

@@ -6,8 +6,10 @@
 package fi.kivibot.pallo.assets;
 
 import fi.kivibot.pallo.render.Material;
+import fi.kivibot.pallo.render.Mesh;
 import fi.kivibot.pallo.render.Shader;
 import fi.kivibot.pallo.render.Texture;
+import fi.kivibot.pallo.render.VertexBuffer;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
@@ -17,6 +19,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -40,6 +44,7 @@ public class AssetManager {
     private static final HashMap<String, JSONObject> materials = new HashMap<>();
     private static final HashMap<String, Shader> shaders = new HashMap<>();
     private static final HashMap<String, Texture> textures = new HashMap<>();
+    private static final HashMap<String, Mesh> meshes = new HashMap<>();
 
     private static final HashMap<String, Integer> shader_part = new HashMap<>();
     private static final HashMap<String, JSONObject> shader_prog = new HashMap<>();
@@ -62,6 +67,9 @@ public class AssetManager {
         } else if (f.getName().endsWith(".glsl")) {
             loadShader(readFileToString(f), f.getName().split("\\.")[0], f.getName().split("\\.")[1]);
             System.out.println("loaded " + f);
+        } else if (f.getName().endsWith(".p2dme")) {
+            loadMesh(readFileToString(f), f.getName().split("\\.")[0]);
+            System.out.println("loaded " + f);
         } else {
             System.out.println("did not load " + f);
         }
@@ -74,6 +82,10 @@ public class AssetManager {
         for (File fi : f.listFiles()) {
             addFile(fi);
         }
+    }
+
+    public static Mesh getMesh(String key) {
+        return meshes.get(key);
     }
 
     public static Texture getTexture(String key) {
@@ -255,6 +267,66 @@ public class AssetManager {
             return;
         }
         shader_part.put(name + "." + type, new Integer(sid));
+    }
+
+    private static void loadMesh(String instr, String name) {
+        String[] pts = instr.split("\n");
+        int vc = 0;
+        int fc = 0;
+        int tc = 0;
+        for (String s : pts) {
+            if (s.length() == 0) {
+                continue;
+            }
+            switch (s.charAt(0)) {
+                case 'v':
+                    vc++;
+                    break;
+                case 'f':
+                    fc++;
+                case 't':
+                    tc++;
+                    break;
+                default:
+                    break;
+            }
+        }
+        FloatBuffer ver = BufferUtils.createFloatBuffer(vc * 2);
+        IntBuffer ind = BufferUtils.createIntBuffer(fc * 3);
+        FloatBuffer tec = BufferUtils.createFloatBuffer(tc * 2);
+        for (String s : pts) {
+            String[] sp = s.split(" ");
+            switch (sp[0]) {
+                case "v":
+                    float x = Float.parseFloat(sp[1]);
+                    float y = Float.parseFloat(sp[2]);
+                    ver.put(new float[]{x, y});
+                    break;
+                case "f":
+                    ind.put(Integer.parseInt(sp[1]));
+                    ind.put(Integer.parseInt(sp[2]));
+                    ind.put(Integer.parseInt(sp[3]));
+                    break;
+                case "t":
+                    float u = Float.parseFloat(sp[1]);
+                    float v = Float.parseFloat(sp[2]);
+                    tec.put(new float[]{u, v});
+                    break;
+                default:
+                    break;
+            }
+        }
+        ver.flip();
+        ind.flip();
+        tec.flip();
+        VertexBuffer v = new VertexBuffer(VertexBuffer.Type.Float, VertexBuffer.Usage.Dynamic);
+        VertexBuffer t = new VertexBuffer(VertexBuffer.Type.Float, VertexBuffer.Usage.Dynamic);
+        VertexBuffer i = new VertexBuffer(VertexBuffer.Type.Integer, VertexBuffer.Usage.Dynamic);
+        v.setData(ver);
+        t.setData(tec);
+        i.setData(ind);
+        Mesh m = new Mesh(v, t, i);
+        meshes.put(name, m);
     }
 
     public static String status() {

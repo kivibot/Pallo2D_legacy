@@ -16,6 +16,7 @@ import org.lwjgl.util.vector.Vector3f;
 public class Light extends Node {
 
     private Vector3f color;
+    
 
     public Light(Vector3f c) {
         color = c;

@@ -81,7 +81,7 @@ public abstract class PalloApp {
         this.Update();
         handleRendering();
         Display.update();
-        //   Display.sync(frame_rate);
+        Display.sync(frame_rate);
         //   Display.sync(1);
         return running;
     }

@@ -153,7 +153,7 @@ public class Renderer {
             
             md.flip();
 
-            int shader_max_light = 20;
+            int shader_max_light = 1;
             FloatBuffer ld = BufferUtils.createFloatBuffer(shader_max_light * 3 * 3);
             int ic = 0;
 
@@ -437,7 +437,7 @@ public class Renderer {
                 GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
                 GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
 
-                GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL30.GL_RGBA32F,
+                GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL30.GL_RGB32F,
                         (int) fbo.getDimensions().x, (int) fbo.getDimensions().y,
                         0, GL11.GL_RGBA, GL11.GL_INT, (ByteBuffer) null);
 
