@@ -17,7 +17,12 @@ public class Light extends Node {
 
     private Vector3f color;
     
+    private Mesh m;
 
+    private float rot = 0;
+    private float fol = (float) (Math.PI*2);
+    private int rays = 8;
+    
     public Light(Vector3f c) {
         color = c;
     }
@@ -29,5 +34,15 @@ public class Light extends Node {
     public void setColor(Vector3f c) {
         color = c;
     }
+    
+    public Mesh getMesh(){
+        return m;
+    }
+    
+    public void setMesh(Mesh me){
+        m = me;
+    }
+    
+    
 
 }
