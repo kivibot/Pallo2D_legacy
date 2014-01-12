@@ -159,8 +159,8 @@ public class Renderer {
 
             for (Light l : lights) {
                 Vector3f col = l.getColor();
-                Vector3f pos = l.getTransform().getPosition();
-                ld.put(new float[]{col.x, col.y, col.z, pos.x, pos.y, pos.z, col.x, col.y, col.z});
+                Vector2f pos = l.getTransform().getWorldPosition();
+                ld.put(new float[]{col.x, col.y, col.z, pos.x, pos.y, l.getHeight(), col.x, col.y, col.z});
                 ic++;
                 if (ic == shader_max_light) {
                     ic = 0;
@@ -211,28 +211,6 @@ public class Renderer {
         GL20.glUniform1(GL20.glGetUniformLocation(pass1_shader.getID(), "li"), ld);
         GL20.glUniform1(GL20.glGetUniformLocation(pass1_shader.getID(), "mat"), md);
         
-
-        //RENDERING
-        GL30.glBindVertexArray(screen.getMesh().getID());
-        GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, screen.getMesh().getIndiceBuffer().getID());
-        GL11.glDrawElements(GL11.GL_TRIANGLES, screen.getMesh().getIndiceBuffer().getData().capacity(), GL11.GL_UNSIGNED_INT, 0);
-
-    }
-
-    @Deprecated
-    private void renderLight(Light l) {
-        //BINDING
-        if (!this.bindShader(pass1_shader)) {
-            //NOPE
-            System.out.println("Could not bind shader");
-            return;
-        }
-
-        Vector3f pos = l.getTransform().getPosition();
-        Vector3f col = l.getColor();
-
-        GL20.glUniform3f(0, pos.x, pos.y, pos.z);
-        GL20.glUniform3f(1, col.x, col.y, col.z);
 
         //RENDERING
         GL30.glBindVertexArray(screen.getMesh().getID());

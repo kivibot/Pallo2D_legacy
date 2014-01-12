@@ -22,7 +22,7 @@ public class Node {
     private Transform t;
 
     public Node() {
-        this(new Transform(new Vector3f(0, 0, 0)));
+        this(new Transform(new Vector2f(0, 0)));
     }
 
     public Node(Transform tr) {

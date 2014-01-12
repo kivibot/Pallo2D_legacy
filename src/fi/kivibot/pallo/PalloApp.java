@@ -9,7 +9,6 @@ import fi.kivibot.engine.game.GameObject;
 import fi.kivibot.misc.FPSCounter;
 import fi.kivibot.misc.Node;
 import fi.kivibot.pallo.assets.AssetManager;
-import fi.kivibot.pallo.render.RenderAble;
 import fi.kivibot.pallo.render.Renderer;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -20,7 +19,6 @@ import org.lwjgl.opengl.ContextAttribs;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.PixelFormat;
 
 /**

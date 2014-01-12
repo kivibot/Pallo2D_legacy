@@ -1,4 +1,3 @@
-import fi.kivibot.misc.Node;
 import fi.kivibot.pallo.PalloApp;
 import fi.kivibot.pallo.assets.AssetManager;
 import fi.kivibot.pallo.render.Light;
@@ -8,15 +7,11 @@ import fi.kivibot.pallo.render.Spatial;
 import java.io.File;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL30;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
@@ -53,15 +48,13 @@ public class Main extends PalloApp {
 
         rootNode.addChild(s);
 
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < 19; i++) {
             l = new Light(new Vector3f((float) Math.random(), (float) Math.random(), (float) Math.random()));
-            l.getTransform().getPosition().x = (float) (Math.random() * 2 - 1);
-            l.getTransform().getPosition().y = (float) (Math.random() * 2 - 1);
-            l.getTransform().getPosition().z = 0.5f;
+            l.getTransform().setLocalPosition(new Vector2f((float) (Math.random() * 2 - 1), (float) (Math.random() * 2 - 1)));
             rootNode.addChild(l);
         }
         l = new Light(new Vector3f(1, 1, 1));
-        l.getTransform().getPosition().z = 0.5f;
+        l.getTransform().setLocalPosition(new Vector2f(0, 0));
         rootNode.addChild(l);
     }
 
@@ -111,16 +104,16 @@ public class Main extends PalloApp {
             }
         }
         if (Keyboard.isKeyDown(Keyboard.KEY_N)) {
-            l.getTransform().setPosition(new Vector3f(x, y, l.getTransform().getPosition().z));
-            System.out.println(l.getTransform().getPosition().x + " " + l.getTransform().getPosition().y + " " + l.getTransform().getPosition().z);
+            l.getTransform().setLocalPosition(new Vector2f(x, y));
+            System.out.println(l.getTransform().getWorldPosition());
         }
         if (Keyboard.isKeyDown(Keyboard.KEY_O)) {
-            l.getTransform().getPosition().z += 0.01f;
-            System.out.println(l.getTransform().getPosition().z);
+            l.setHeight(l.getHeight()+0.01f);
+            System.out.println(l.getHeight());
         }
         if (Keyboard.isKeyDown(Keyboard.KEY_I)) {
-            l.getTransform().getPosition().z -= 0.01f;
-            System.out.println(l.getTransform().getPosition().z);
+            l.setHeight(l.getHeight()-0.01f);
+            System.out.println(l.getHeight());
         }
         if (Keyboard.isKeyDown(Keyboard.KEY_K)) {
             s.getMaterial().setShininess(s.getMaterial().getShininess() - 0.5f);
@@ -129,6 +122,10 @@ public class Main extends PalloApp {
         if (Keyboard.isKeyDown(Keyboard.KEY_L)) {
             s.getMaterial().setShininess(s.getMaterial().getShininess() + 0.5f);
             System.out.println(s.getMaterial().getShininess());
+        }        
+        if (Keyboard.isKeyDown(Keyboard.KEY_M)) {
+            l.getTransform().setRotation((float) (System.currentTimeMillis()%2000 * Math.PI / 1000f));
+            
         }
     }
 }
