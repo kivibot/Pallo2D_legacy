@@ -16,7 +16,7 @@ import org.lwjgl.util.vector.Vector3f;
  */
 public class Transform {
 
-    private Vector2f pos;
+    private Vector2f pos, sca = new Vector2f(1, 1);
     private float rot = 0;
 
     private Matrix3f mat = new Matrix3f();
@@ -47,16 +47,20 @@ public class Transform {
     }
 
     private void updateTranslationPart() {
+        //GL
+        mat.m02 = pos.x;
+        mat.m12 = pos.y;
+
+        //LWJGL
         mat.m20 = pos.x;
         mat.m21 = pos.y;
     }
 
     public Vector2f getWorldPosition() {
-        Vector3f pp = new Vector3f(1, 0, 1);
+        Vector3f pp = new Vector3f(0, 0, 1);
         Vector3f ret = new Vector3f();
         Matrix3f m = this.getWorldMatrix();
         Matrix3f.transform(m, pp, ret);
-        System.out.println(rot);
         return new Vector2f(ret.x, ret.y);
     }
 
@@ -67,7 +71,7 @@ public class Transform {
     public Matrix3f getWorldMatrix() {
         Matrix3f ret = new Matrix3f();
         if (this.parent != null) {
-            Matrix3f.mul(this.parent.getWorldMatrix(), this.getLocalMatrix(), ret);
+            Matrix3f.mul(this.getLocalMatrix(), this.parent.getWorldMatrix(), ret);
         } else {
             ret = this.getLocalMatrix();
         }
@@ -84,10 +88,17 @@ public class Transform {
         float cos = (float) Math.cos(r);
         float sin = (float) Math.sin(r);
 
-        mat.m00 = cos;
-        mat.m10 = -sin;
-        mat.m01 = sin;
-        mat.m11 = cos;
+        mat.m00 = cos * sca.x;
+        mat.m10 = -sin * sca.y;
+        mat.m01 = sin * sca.x;
+        mat.m11 = cos * sca.y;
+    }
+
+    public void scale(float x, float y) {
+        sca.x = x;
+        sca.y = y;
+
+        this.setRotation(this.rot);
     }
 
 }

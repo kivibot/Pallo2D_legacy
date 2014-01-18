@@ -14,16 +14,16 @@ const int lightsize = 3+3+3;
 
 uniform sampler2D samp[3];
 
-uniform float uuh;
+uniform vec2 screen;
 uniform float mat[matcount*matsize];      
 uniform float li[lightcount*lightsize];
-
-in	vec2 pass_Texcoord;
 
 out vec3 out_Color;
 out vec3 out_Spec;
 
 void main(void) {
+	vec2 pass_Texcoord = gl_FragCoord.xy/vec2(800,600);
+
 	vec3 dif = texture(samp[0], pass_Texcoord);
 	vec3 mp = texture(samp[1], pass_Texcoord);
 	vec3 mn = normalize(texture(samp[2], pass_Texcoord));
@@ -53,10 +53,7 @@ void main(void) {
 		
 		vec3 hv = normalize(ltm+cp-mp);
 		
-		//out_Color = vec4(lspe,1);
-	
 		out_Color += a * (max(0,dot(mn,ltm))* lcol * dif + lspe * mat_0 * pow(max(0.0, dot(hv,mn)), mat_shi) * 1.0);//dif.w);
-		//out_Color += pow(max(0.0, dot(reflect(ltm, mn), vec3(0.0,0.0,-1.0))), mat_shi);
-		//out_Color.x = mn.z;
+		//out_Color += a * (lspe * mat_0 * pow(max(0.0, dot(hv,mn)), mat_shi) * 1.0);
 	}
 }

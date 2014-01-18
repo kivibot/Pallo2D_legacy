@@ -1,3 +1,4 @@
+import fi.kivibot.misc.Node;
 import fi.kivibot.pallo.PalloApp;
 import fi.kivibot.pallo.assets.AssetManager;
 import fi.kivibot.pallo.render.Light;
@@ -12,6 +13,7 @@ import java.util.logging.Logger;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
+import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
@@ -31,6 +33,7 @@ public class Main extends PalloApp {
     }
 
     private Spatial s;
+    private Node n;
     private float x = 0, y = 0;
 
     private int ic = 1;
@@ -41,20 +44,26 @@ public class Main extends PalloApp {
         AssetManager.addDir(new File("assets/"));
         Material ma = AssetManager.getMaterial("apina");
         ma.setSpecularColor(new Vector3f(1, 1, 1));
-        System.out.println(ma);
 
         //Mesh me = new Mesh(new float[]{x - 0.5f, y - 0.5f, x - 0.5f, y + 0.5f, x + 0.5f, y + 0.5f, x + 0.5f, y - 0.5f}, new int[]{0, 1, 2, 0, 2, 3}, new float[]{0, 1, 0, 0, 1, 0, 1, 1});
         s = new Spatial(AssetManager.getMesh("mesh"), ma);
 
-        rootNode.addChild(s);
+        n = new Node();
+        n.addChild(s);
+        s.getTransform().translate(new Vector2f(0.3f, 0));
 
-        for (int i = 0; i < 19; i++) {
+        rootNode.addChild(n);
+
+        for (int i = 0; i < 20; i++) {
             l = new Light(new Vector3f((float) Math.random(), (float) Math.random(), (float) Math.random()));
             l.getTransform().setLocalPosition(new Vector2f((float) (Math.random() * 2 - 1), (float) (Math.random() * 2 - 1)));
+            l.setHeight(1);
+            l.genMesh();
             rootNode.addChild(l);
         }
         l = new Light(new Vector3f(1, 1, 1));
         l.getTransform().setLocalPosition(new Vector2f(0, 0));
+        l.genMesh();
         rootNode.addChild(l);
     }
 
@@ -108,11 +117,11 @@ public class Main extends PalloApp {
             System.out.println(l.getTransform().getWorldPosition());
         }
         if (Keyboard.isKeyDown(Keyboard.KEY_O)) {
-            l.setHeight(l.getHeight()+0.01f);
+            l.setHeight(l.getHeight() + 0.01f);
             System.out.println(l.getHeight());
         }
         if (Keyboard.isKeyDown(Keyboard.KEY_I)) {
-            l.setHeight(l.getHeight()-0.01f);
+            l.setHeight(l.getHeight() - 0.01f);
             System.out.println(l.getHeight());
         }
         if (Keyboard.isKeyDown(Keyboard.KEY_K)) {
@@ -122,10 +131,22 @@ public class Main extends PalloApp {
         if (Keyboard.isKeyDown(Keyboard.KEY_L)) {
             s.getMaterial().setShininess(s.getMaterial().getShininess() + 0.5f);
             System.out.println(s.getMaterial().getShininess());
-        }        
+        }
         if (Keyboard.isKeyDown(Keyboard.KEY_M)) {
-            l.getTransform().setRotation((float) (System.currentTimeMillis()%2000 * Math.PI / 1000f));
-            
+            this.getRenderer().getMainCam().getTransform().setRotation((float) (System.currentTimeMillis() % 2000 * Math.PI / 1000f));
+            //n.getTransform().setRotation((float) (System.currentTimeMillis() % 2000 * Math.PI / 1000f));
+        }
+        if (Keyboard.isKeyDown(Keyboard.KEY_UP)) {
+            s.getTransform().translate(new Vector2f(0, 0.01f));
+        }
+        if (Keyboard.isKeyDown(Keyboard.KEY_DOWN)) {
+            s.getTransform().translate(new Vector2f(0, -0.01f));
+        }
+        if (Keyboard.isKeyDown(Keyboard.KEY_NUMPAD4)) {
+            GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE);
+        }
+        if (Keyboard.isKeyDown(Keyboard.KEY_NUMPAD5)) {
+            GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
         }
     }
 }

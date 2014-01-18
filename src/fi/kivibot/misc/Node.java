@@ -61,10 +61,13 @@ public class Node {
 
     public void setParent(Node n) {
         p = n;
+        this.t.setParent(n == null ? null : n.getTransform());
     }
 
     public void setTransform(Transform m) {
+        t.setParent(null);
         t = m;
+        m.setParent(p.getTransform());
     }
 
     public Transform getTransform() {

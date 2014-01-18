@@ -7,7 +7,6 @@ package fi.kivibot.pallo.render;
 
 import fi.kivibot.math.Rect;
 import fi.kivibot.misc.Node;
-import fi.kivibot.misc.PalloException;
 import fi.kivibot.pallo.assets.AssetManager;
 import fi.kivibot.pallo.render.VertexBuffer.Target;
 import fi.kivibot.pallo.render.VertexBuffer.Type;
@@ -22,14 +21,11 @@ import java.util.Queue;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
 import org.lwjgl.opengl.GL13;
-import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GL31;
-import org.lwjgl.opengl.GL32;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
@@ -51,8 +47,13 @@ public class Renderer {
 
     private List<Material> matList = new ArrayList<Material>();
 
+    private Camera main_cam;
+
     public Renderer(int w, int h) {
         pass0_fbo = new FBO(w, h);
+
+        main_cam = new Camera(w, h);
+
         IntBuffer pass0_trgs = BufferUtils.createIntBuffer(3);
         pass0_trgs.put(new int[]{GL30.GL_COLOR_ATTACHMENT0, GL30.GL_COLOR_ATTACHMENT1, GL30.GL_COLOR_ATTACHMENT2});
         pass0_trgs.flip();
@@ -143,38 +144,26 @@ public class Renderer {
             this.bindTexture(pass0_fbo.getTextureList().get(2), GL13.GL_TEXTURE2);
 
             int shader_max_materials = 100;
-            
+
             FloatBuffer md = BufferUtils.createFloatBuffer(shader_max_materials * (3 + 1));
 
             for (Material m : this.matList) {
                 md.put(new float[]{m.getSpecularColor().x, m.getSpecularColor().y,
                     m.getSpecularColor().z, m.getShininess()});
             }
-            
+
             md.flip();
 
-            int shader_max_light = 1;
-            FloatBuffer ld = BufferUtils.createFloatBuffer(shader_max_light * 3 * 3);
-            int ic = 0;
+            GL11.glEnable(GL11.GL_BLEND);
+            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
 
             for (Light l : lights) {
-                Vector3f col = l.getColor();
-                Vector2f pos = l.getTransform().getWorldPosition();
-                ld.put(new float[]{col.x, col.y, col.z, pos.x, pos.y, l.getHeight(), col.x, col.y, col.z});
-                ic++;
-                if (ic == shader_max_light) {
-                    ic = 0;
-                    ld.flip();
-                    renderPass1(ld, md);
-                    ld = BufferUtils.createFloatBuffer(shader_max_light * 3 * 3);
-                }
+                renderPass1(l, md);
             }
-            if (ic > 0) {
-                ld.flip();
-                renderPass1(ld, md);
-            }
-            //this.updateVertexBuffer(lightbuf);
 
+            GL11.glDisable(GL11.GL_BLEND);
+
+            //this.updateVertexBuffer(lightbuf);
             //GL15.glBindBuffer(GL31.GL_UNIFORM_BUFFER, lightbuf.getID());
             //GL30.glBindBufferBase(GL31.GL_UNIFORM_BUFFER, 0, lightbuf.getID());
             //GL31.glUniformBlockBinding(pass1_shader.getID(), lightbuf.getID(), 1);
@@ -200,7 +189,7 @@ public class Renderer {
         }
     }
 
-    private void renderPass1(FloatBuffer ld, FloatBuffer md) {
+    private void renderPass1(Light l, FloatBuffer md) {
         //BINDING
         if (!this.bindShader(pass1_shader)) {
             //NOPE
@@ -208,14 +197,30 @@ public class Renderer {
             return;
         }
 
+        this.updateMesh(l.getMesh());
+
+        FloatBuffer ld = BufferUtils.createFloatBuffer(9);
+
+        Vector3f col = l.getColor();
+        Vector2f pos = l.getTransform().getWorldPosition();
+        ld.put(new float[]{col.x, col.y, col.z, pos.x, pos.y, l.getHeight(), col.x, col.y, col.z});
+        ld.flip();
+
         GL20.glUniform1(GL20.glGetUniformLocation(pass1_shader.getID(), "li"), ld);
         GL20.glUniform1(GL20.glGetUniformLocation(pass1_shader.getID(), "mat"), md);
-        
+        FloatBuffer mat0b = BufferUtils.createFloatBuffer(9);
+        l.getTransform().getWorldMatrix().store(mat0b);
+        mat0b.flip();
+        FloatBuffer matcb = BufferUtils.createFloatBuffer(9);
+        this.main_cam.getTransform().getWorldMatrix().store(matcb);
+        matcb.flip();
+        GL20.glUniformMatrix3(GL20.glGetUniformLocation(pass1_shader.getID(), "mat0"), true, mat0b);
+        GL20.glUniformMatrix3(GL20.glGetUniformLocation(pass1_shader.getID(), "matc"), true, matcb);
 
         //RENDERING
-        GL30.glBindVertexArray(screen.getMesh().getID());
-        GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, screen.getMesh().getIndiceBuffer().getID());
-        GL11.glDrawElements(GL11.GL_TRIANGLES, screen.getMesh().getIndiceBuffer().getData().capacity(), GL11.GL_UNSIGNED_INT, 0);
+        GL30.glBindVertexArray(l.getMesh().getID());
+        GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, l.getMesh().getIndiceBuffer().getID());
+        GL11.glDrawElements(GL11.GL_TRIANGLES, l.getMesh().getIndiceBuffer().getData().capacity(), GL11.GL_UNSIGNED_INT, 0);
 
     }
 
@@ -260,6 +265,17 @@ public class Renderer {
         this.updateMesh(mesh);
 
         GL20.glUniform1i(GL20.glGetUniformLocation(pass0.getID(), "matID"), id);
+
+        FloatBuffer mat0b = BufferUtils.createFloatBuffer(9);
+        s.getTransform().getWorldMatrix().store(mat0b);
+        mat0b.flip();
+        FloatBuffer matcb = BufferUtils.createFloatBuffer(9);
+        this.main_cam.getTransform().getWorldMatrix().store(matcb);
+        matcb.flip();
+
+        GL20.glUniformMatrix3(GL20.glGetUniformLocation(pass0.getID(), "mat0"), true, mat0b);
+        GL20.glUniformMatrix3(GL20.glGetUniformLocation(pass0.getID(), "matc"), true, matcb);
+
         //RENDERING
         GL30.glBindVertexArray(s.getMesh().getID());
         GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, s.getMesh().getIndiceBuffer().getID());
@@ -488,6 +504,10 @@ public class Renderer {
         }
         GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, f.getID());
         return true;
+    }
+
+    public Camera getMainCam() {
+        return main_cam;
     }
 
 }

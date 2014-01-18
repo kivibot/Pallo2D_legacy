@@ -28,11 +28,15 @@ import org.lwjgl.opengl.PixelFormat;
 public abstract class PalloApp {
 
     private boolean running = true;
-    private int frame_rate = 120;
+    private int frame_rate = 60;
     private FPSCounter fps = new FPSCounter(frame_rate / 2);
     private Renderer renderer;
 
     protected Node rootNode = new Node();
+
+    protected Renderer getRenderer() {
+        return renderer;
+    }
 
     protected abstract void Init();
 

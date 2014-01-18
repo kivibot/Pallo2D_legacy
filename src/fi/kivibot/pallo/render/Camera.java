@@ -5,10 +5,17 @@
  */
 package fi.kivibot.pallo.render;
 
+import fi.kivibot.misc.Node;
+
 /**
  *
  * @author kivi
  */
-public class Camera {
-    
+public class Camera extends Node {
+
+    public Camera(int w, int h) {
+        float a = (float) w / (float) h;
+        this.getTransform().scale(1, a);
+    }
+
 }

@@ -6,6 +6,9 @@
 package fi.kivibot.pallo.render;
 
 import fi.kivibot.misc.Node;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.util.vector.Vector3f;
 
 /**
@@ -19,7 +22,7 @@ public class Light extends Node {
     private Mesh m;
 
     private float fol = (float) (Math.PI * 2);
-    private int rays = 8;
+    private int rays = 32;
     private float height = 0.5f;
 
     public Light(Vector3f c) {
@@ -56,6 +59,31 @@ public class Light extends Node {
 
     public void setHeight(float f) {
         this.height = f;
+    }
+
+    @Deprecated
+    public void genMesh() {
+        FloatBuffer fb = BufferUtils.createFloatBuffer(2 + this.rays * 2);
+        IntBuffer ib = BufferUtils.createIntBuffer(3 * rays);
+        fb.put(new float[]{0, 0});
+        float l = 0.5f;
+        for (int i = 0; i < this.rays; i++) {
+            double a = (Math.PI * 2 / this.rays) * i;
+            float x = (float) (l * Math.cos(a));
+            float y = (float) (l * Math.sin(a));
+            fb.put(new float[]{x, y});
+
+            ib.put(0);
+            ib.put(i + 1);
+            ib.put((i + 1) % this.rays + 1);
+        }
+        fb.flip();
+        ib.flip();
+        VertexBuffer vb = new VertexBuffer(VertexBuffer.Type.Float, VertexBuffer.Usage.Dynamic);
+        VertexBuffer vib = new VertexBuffer(VertexBuffer.Type.Integer, VertexBuffer.Usage.Dynamic);
+        vb.setData(fb);
+        vib.setData(ib);
+        this.m = new Mesh(vb, vb, vib);
     }
 
 }
