@@ -38,6 +38,7 @@ public class Main extends PalloApp {
 
     private int ic = 1;
     private Light l;
+    private Node ln;
 
     @Override
     protected void Init() {
@@ -50,28 +51,44 @@ public class Main extends PalloApp {
 
         n = new Node();
         n.addChild(s);
-        s.getTransform().translate(new Vector2f(0.3f, 0));
+        s.getTransform().translate(new Vector2f(0,0));
 
         rootNode.addChild(n);
 
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < 0; i++) {
             l = new Light(new Vector3f((float) Math.random(), (float) Math.random(), (float) Math.random()));
             l.getTransform().setLocalPosition(new Vector2f((float) (Math.random() * 2 - 1), (float) (Math.random() * 2 - 1)));
             l.setHeight(1);
             l.genMesh();
             rootNode.addChild(l);
         }
-        l = new Light(new Vector3f(1, 1, 1));
-        l.getTransform().setLocalPosition(new Vector2f(0, 0));
-        l.genMesh();
-        rootNode.addChild(l);
+
+        ln = new Node();
+        rootNode.addChild(ln);
+        /*
+         l = new Light(new Vector3f(1, 1, 1));
+         l.getTransform().setLocalPosition(new Vector2f(0, 0));
+         l.genMesh();
+         ln.addChild(l);
+         */
+        float rc = 8;
+        float ra = 0.005f;
+        for (int i = 0; i < rc; i++) {
+            float a = (float) (2f * Math.PI / rc * i);
+            float s = (float) (Math.sin(a) * ra);
+            float c = (float) (Math.cos(a) * ra);
+            l = new Light(new Vector3f(1f/rc, 1f/rc, 1f/rc));
+            l.getTransform().setLocalPosition(new Vector2f(c, s));
+            l.genMesh();
+            ln.addChild(l);
+        }
     }
 
     @Override
     protected void Update() {
 
-        x = Mouse.getX() / 400f - 1;
-        y = Mouse.getY() / 300f - 1;
+        x = Mouse.getX() / 400f - 1f;
+        y = Mouse.getY() / 300f - 1f;
 
         if (Keyboard.isKeyDown(Keyboard.KEY_SPACE)) {
             for (int ib = 0; ib < 1; ib++) {
@@ -113,8 +130,8 @@ public class Main extends PalloApp {
             }
         }
         if (Keyboard.isKeyDown(Keyboard.KEY_N)) {
-            l.getTransform().setLocalPosition(new Vector2f(x, y));
-            System.out.println(l.getTransform().getWorldPosition());
+            ln.getTransform().setLocalPosition(new Vector2f(x, y));
+            System.out.println(ln.getTransform().getWorldPosition());
         }
         if (Keyboard.isKeyDown(Keyboard.KEY_O)) {
             l.setHeight(l.getHeight() + 0.01f);
@@ -133,11 +150,13 @@ public class Main extends PalloApp {
             System.out.println(s.getMaterial().getShininess());
         }
         if (Keyboard.isKeyDown(Keyboard.KEY_M)) {
-            this.getRenderer().getMainCam().getTransform().setRotation((float) (System.currentTimeMillis() % 2000 * Math.PI / 1000f));
-            //n.getTransform().setRotation((float) (System.currentTimeMillis() % 2000 * Math.PI / 1000f));
+            //this.getRenderer().getMainCam().getTransform().setRotation((float) (System.currentTimeMillis() % 2000 * Math.PI / 1000f));
+            s.getTransform().setRotation((float) (System.currentTimeMillis() % 2000 * Math.PI / 1000f));
+            //ln.getTransform().setRotation((float) (System.currentTimeMillis() % 2000 * Math.PI / 1000f));
         }
         if (Keyboard.isKeyDown(Keyboard.KEY_UP)) {
             s.getTransform().translate(new Vector2f(0, 0.01f));
+            System.out.println(s.getTransform().getWorldMatrix());
         }
         if (Keyboard.isKeyDown(Keyboard.KEY_DOWN)) {
             s.getTransform().translate(new Vector2f(0, -0.01f));
@@ -147,6 +166,18 @@ public class Main extends PalloApp {
         }
         if (Keyboard.isKeyDown(Keyboard.KEY_NUMPAD5)) {
             GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
+        }
+        if (Keyboard.isKeyDown(Keyboard.KEY_H)) {
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            l = new Light(new Vector3f((float) Math.random(), (float) Math.random(), (float) Math.random()));
+            l.getTransform().setLocalPosition(new Vector2f((float) (Math.random() * 2 - 1), (float) (Math.random() * 2 - 1)));
+            l.setHeight(1);
+            l.genMesh();
+            rootNode.addChild(l);
         }
     }
 }

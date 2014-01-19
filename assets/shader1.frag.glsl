@@ -2,7 +2,7 @@
 
 uniform sampler2D samp[3];
 uniform float matID;
-
+uniform mat3 matc;
 
 in	vec3 pass_Position;
 in	vec2 pass_Texcoord;

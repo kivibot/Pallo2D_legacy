@@ -22,8 +22,9 @@ public class Light extends Node {
     private Mesh m;
 
     private float fol = (float) (Math.PI * 2);
-    private int rays = 32;
+    private int rays = 2555;
     private float height = 0.5f;
+    private float range = 2f;
 
     public Light(Vector3f c) {
         color = c;
@@ -61,21 +62,37 @@ public class Light extends Node {
         this.height = f;
     }
 
+    public void setRC(int rc) {
+        rays = rc;
+    }
+
+    public int getRC() {
+        return rays;
+    }
+
+    public void setRange(float r) {
+        range = r;
+    }
+
+    public float getRange() {
+        return range;
+    }
+
     @Deprecated
     public void genMesh() {
         FloatBuffer fb = BufferUtils.createFloatBuffer(2 + this.rays * 2);
         IntBuffer ib = BufferUtils.createIntBuffer(3 * rays);
         fb.put(new float[]{0, 0});
-        float l = 0.5f;
+        float l = range;
         for (int i = 0; i < this.rays; i++) {
-            double a = (Math.PI * 2 / this.rays) * i;
+            double a = (fol / (float) (this.rays - 1)) * i;
             float x = (float) (l * Math.cos(a));
             float y = (float) (l * Math.sin(a));
             fb.put(new float[]{x, y});
 
             ib.put(0);
             ib.put(i + 1);
-            ib.put((i + 1) % this.rays + 1);
+            ib.put(i + 2);
         }
         fb.flip();
         ib.flip();

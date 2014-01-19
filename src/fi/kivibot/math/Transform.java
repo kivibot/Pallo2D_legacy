@@ -47,10 +47,7 @@ public class Transform {
     }
 
     private void updateTranslationPart() {
-        //GL
-        mat.m02 = pos.x;
-        mat.m12 = pos.y;
-
+        
         //LWJGL
         mat.m20 = pos.x;
         mat.m21 = pos.y;
@@ -89,8 +86,8 @@ public class Transform {
         float sin = (float) Math.sin(r);
 
         mat.m00 = cos * sca.x;
-        mat.m10 = -sin * sca.y;
-        mat.m01 = sin * sca.x;
+        mat.m10 = sin * sca.x;
+        mat.m01 = -sin * sca.y;
         mat.m11 = cos * sca.y;
     }
 
