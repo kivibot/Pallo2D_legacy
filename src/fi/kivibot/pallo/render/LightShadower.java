@@ -66,7 +66,7 @@ public class LightShadower implements RayCastCallback {
     @Override
     public float reportFixture(Fixture fix, Vec2 point, Vec2 normal, float frac) {
         rcep = point;
-        return 0;
+        return frac;
     }
 
 }

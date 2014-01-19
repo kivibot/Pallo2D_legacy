@@ -71,8 +71,8 @@ public class Main extends PalloApp {
          l.genMesh();
          ln.addChild(l);
          */
-        float rc = 8;
-        float ra = 0.005f;
+        float rc = 16;
+        float ra = 0.01f;
         for (int i = 0; i < rc; i++) {
             float a = (float) (2f * Math.PI / rc * i);
             float s = (float) (Math.sin(a) * ra);
@@ -151,7 +151,7 @@ public class Main extends PalloApp {
         }
         if (Keyboard.isKeyDown(Keyboard.KEY_M)) {
             //this.getRenderer().getMainCam().getTransform().setRotation((float) (System.currentTimeMillis() % 2000 * Math.PI / 1000f));
-            s.getTransform().setRotation((float) (System.currentTimeMillis() % 2000 * Math.PI / 1000f));
+            //s.getTransform().setRotation((float) (System.currentTimeMillis() % 2000 * Math.PI / 1000f));
             //ln.getTransform().setRotation((float) (System.currentTimeMillis() % 2000 * Math.PI / 1000f));
         }
         if (Keyboard.isKeyDown(Keyboard.KEY_UP)) {

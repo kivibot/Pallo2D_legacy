@@ -26,6 +26,7 @@ import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GL31;
+import org.lwjgl.util.vector.Matrix3f;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
@@ -50,7 +51,7 @@ public class Renderer {
     private Camera main_cam;
 
     private LightShadower ls = new LightShadower();
-    
+
     public Renderer(int w, int h) {
         pass0_fbo = new FBO(w, h);
 
@@ -279,6 +280,40 @@ public class Renderer {
         GL20.glUniformMatrix3(GL20.glGetUniformLocation(pass0.getID(), "mat0"), false, mat0b);
         GL20.glUniformMatrix3(GL20.glGetUniformLocation(pass0.getID(), "matc"), false, matcb);
 
+        /**
+         * **MAGIC***
+         */
+        Vector3f ta = new Vector3f(), bita = new Vector3f();
+
+        Matrix3f.transform(s.getTransform().getWorldMatrix(), new Vector3f(1, 0, 0), ta);
+        Matrix3f.transform(s.getTransform().getWorldMatrix(), new Vector3f(0, 1, 0), bita);
+
+        Matrix3f matt = new Matrix3f();
+        matt.m00 = ta.x;
+        matt.m01 = ta.y;
+        matt.m02 = ta.z;
+        matt.m10 = bita.x;
+        matt.m11 = bita.y;
+        matt.m12 = bita.z;
+        matt.m20 = 0;
+        matt.m21 = 0;
+        matt.m22 = 1;
+        
+        FloatBuffer mattb = BufferUtils.createFloatBuffer(9);
+        
+        matt.store(mattb);
+        
+        mattb.flip();
+        
+        GL20.glUniformMatrix3(GL20.glGetUniformLocation(pass0.getID(), "matt"), false, mattb);
+
+        System.out.println(matt);
+        
+        /**
+         * **********
+         */
+        
+        
         //RENDERING
         GL30.glBindVertexArray(s.getMesh().getID());
         GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, s.getMesh().getIndiceBuffer().getID());

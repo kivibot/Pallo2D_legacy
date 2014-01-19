@@ -2,7 +2,7 @@
 
 uniform sampler2D samp[3];
 uniform float matID;
-uniform mat3 matc;
+uniform mat3 matt;
 
 in	vec3 pass_Position;
 in	vec2 pass_Texcoord;
@@ -16,5 +16,5 @@ void main(void) {
 	//out_Color.w = texture(samp[2], pass_Texcoord).x;
 	out_Position = pass_Position;
 	//out_Position.w = matID;
-	out_Normal = 2.0*texture(samp[1], pass_Texcoord)-1.0;
+	out_Normal = matt * (2.0*texture(samp[1], pass_Texcoord)-1.0).xyz;
 }
