@@ -3,14 +3,12 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group name="Pallo2D">
+            <file>file:/C:/Users/kivi/Documents/NetBeansProjects/Power/Pallo/src/fi/kivibot/pallo/render/Light.java</file>
+            <file>file:/C:/Users/kivi/Documents/NetBeansProjects/Power/Pallo/src/fi/kivibot/pallo/render/LightShadower.java</file>
             <file>file:/C:/Users/kivi/Documents/NetBeansProjects/Power/Pallo/src/Main.java</file>
             <file>file:/C:/Users/kivi/Documents/NetBeansProjects/Power/Pallo/src/fi/kivibot/pallo/PalloApp.java</file>
-            <file>file:/C:/Users/kivi/Documents/NetBeansProjects/Power/Pallo/src/fi/kivibot/pallo/render/Material.java</file>
-            <file>file:/C:/Users/kivi/Documents/NetBeansProjects/Power/Pallo/src/fi/kivibot/pallo/render/Light.java</file>
-            <file>file:/C:/Users/kivi/Documents/NetBeansProjects/Power/Pallo/src/fi/kivibot/pallo/render/Renderer.java</file>
-            <file>file:/C:/Users/kivi/Documents/NetBeansProjects/Power/Pallo/src/fi/kivibot/pallo/render/Mesh.java</file>
             <file>file:/C:/Users/kivi/Documents/NetBeansProjects/Power/Pallo/src/fi/kivibot/math/Transform.java</file>
-            <file>file:/C:/Users/kivi/Documents/NetBeansProjects/Power/Pallo/src/fi/kivibot/misc/Node.java</file>
+            <file>file:/C:/Users/kivi/Documents/NetBeansProjects/Power/Pallo/src/fi/kivibot/pallo/render/Renderer.java</file>
         </group>
     </open-files>
 </project-private>

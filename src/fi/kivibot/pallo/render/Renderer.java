@@ -26,6 +26,7 @@ import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GL31;
+import org.lwjgl.opengl.GL33;
 import org.lwjgl.util.vector.Matrix3f;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
@@ -221,6 +222,10 @@ public class Renderer {
         GL20.glUniformMatrix3(GL20.glGetUniformLocation(pass1_shader.getID(), "mat0"), false, mat0b);
         GL20.glUniformMatrix3(GL20.glGetUniformLocation(pass1_shader.getID(), "matc"), false, matcb);
 
+        GL20.glUniform1i(GL20.glGetUniformLocation(pass1_shader.getID(), "samp[0]"), 0);
+        GL20.glUniform1i(GL20.glGetUniformLocation(pass1_shader.getID(), "samp[1]"), 1);
+        GL20.glUniform1i(GL20.glGetUniformLocation(pass1_shader.getID(), "samp[2]"), 2);
+        
         //RENDERING
         GL30.glBindVertexArray(l.getMesh().getID());
         GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, l.getMesh().getIndiceBuffer().getID());
@@ -280,9 +285,6 @@ public class Renderer {
         GL20.glUniformMatrix3(GL20.glGetUniformLocation(pass0.getID(), "mat0"), false, mat0b);
         GL20.glUniformMatrix3(GL20.glGetUniformLocation(pass0.getID(), "matc"), false, matcb);
 
-        /**
-         * **MAGIC***
-         */
         Vector3f ta = new Vector3f(), bita = new Vector3f();
 
         Matrix3f.transform(s.getTransform().getWorldMatrix(), new Vector3f(1, 0, 0), ta);
@@ -298,20 +300,18 @@ public class Renderer {
         matt.m20 = 0;
         matt.m21 = 0;
         matt.m22 = 1;
-        
+
         FloatBuffer mattb = BufferUtils.createFloatBuffer(9);
-        
+
         matt.store(mattb);
-        
+
         mattb.flip();
-        
+
         GL20.glUniformMatrix3(GL20.glGetUniformLocation(pass0.getID(), "matt"), false, mattb);
 
-        System.out.println(matt);
-        
-        /**
-         * **********
-         */
+        GL20.glUniform1i(GL20.glGetUniformLocation(pass0.getID(), "samp[0]"), 0);
+        GL20.glUniform1i(GL20.glGetUniformLocation(pass0.getID(), "samp[1]"), 1);
+        GL20.glUniform1i(GL20.glGetUniformLocation(pass0.getID(), "samp[2]"), 2);
         
         
         //RENDERING

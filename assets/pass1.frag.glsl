@@ -24,9 +24,9 @@ out vec3 out_Spec;
 void main(void) {
 	vec2 pass_Texcoord = gl_FragCoord.xy/vec2(800,600);
 
-	vec3 dif = texture(samp[0], pass_Texcoord);
-	vec3 mp = texture(samp[1], pass_Texcoord);
-	vec3 mn = normalize(texture(samp[2], pass_Texcoord));
+	vec3 dif = texture(samp[0], pass_Texcoord).xyz;
+	vec3 mp = texture(samp[1], pass_Texcoord).xyz;
+	vec3 mn = normalize(texture(samp[2], pass_Texcoord)).xyz;
 	vec3 cp = vec3(0,0,0); //Cam Pos
 	
 	int mid = 0;//int(mp.w);
@@ -53,7 +53,7 @@ void main(void) {
 		
 		vec3 hv = normalize(ltm+cp-mp);
 		
-		out_Color += a * (max(0,dot(mn,ltm))* lcol * dif + lspe * mat_0 * pow(max(0.0, dot(hv,mn)), mat_shi) * 1.0);//dif.w);
+		out_Color = a * (max(0,dot(mn,ltm))* lcol * dif);// + lspe * mat_0 * pow(max(0.0, dot(hv,mn)), mat_shi) * 1.0);//dif.w);
 		//out_Color += a * (lspe * mat_0 * pow(max(0.0, dot(hv,mn)), mat_shi) * 1.0);
 	}
 }

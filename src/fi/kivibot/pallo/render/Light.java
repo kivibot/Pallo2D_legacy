@@ -24,7 +24,7 @@ public class Light extends Node {
     private float fol = (float) (Math.PI * 2);
     private int rays = 2555;
     private float height = 0.5f;
-    private float range = 2f;
+    private float range = 0.7f;
 
     public Light(Vector3f c) {
         color = c;
