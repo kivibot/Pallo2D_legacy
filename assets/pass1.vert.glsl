@@ -10,5 +10,5 @@ in  vec2 in_Position;
 
 void main(void)
 {
-		gl_Position = vec4((matc * mat0 * vec3(in_Position,1.0)).xy, 0.0, 1.0);
+		gl_Position = vec4(vec3((matc * mat0 * vec3(in_Position,1.0)).xy,0).xy, 0.0, 1.0);
 }

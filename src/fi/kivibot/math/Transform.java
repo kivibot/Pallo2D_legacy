@@ -23,6 +23,7 @@ public class Transform {
 
     private Transform parent;
 
+    
     public Transform(Vector2f p) {
         pos = p;
         mat.m22 = 1;

@@ -13,10 +13,9 @@ out vec2 pass_Texcoord;
  
 void main(void)
 {
-        pass_Position = matc*mat0 * vec3(in_Position,1);
+        pass_Position = mat0 * vec3(in_Position,1.0);
 		pass_Position.z = 0.0;
 		vec3 o = vec3((matc * mat0 * vec3(in_Position,1.0)).xy, 0.0);
 		gl_Position = vec4(o, 1.0);
-		//pass_Position = o;
 		pass_Texcoord = in_Texcoord;
 }

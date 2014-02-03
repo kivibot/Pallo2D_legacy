@@ -24,7 +24,8 @@ public class Light extends Node {
     private float fol = (float) (Math.PI * 2);
     private int rays = 2555;
     private float height = 0.5f;
-    private float range = 0.7f;
+    private float range = 01.7f;
+    private boolean cs = true;
 
     public Light(Vector3f c) {
         color = c;
@@ -101,6 +102,14 @@ public class Light extends Node {
         vb.setData(fb);
         vib.setData(ib);
         this.m = new Mesh(vb, vb, vib);
+    }
+
+    public void setCS(boolean b) {
+        cs = b;
+    }
+
+    public boolean getCS() {
+        return cs;
     }
 
 }

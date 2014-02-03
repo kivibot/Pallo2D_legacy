@@ -47,13 +47,13 @@ void main(void) {
 	
 		float d = length(ltm);
 	
-		float a = 1.0 / (d)+1;
+		float a = 1.0 / ((d*0.1+d*d*2));
 	
 		ltm /= d;
 		
 		vec3 hv = normalize(ltm+cp-mp);
 		
-		out_Color = a * (max(0,dot(mn,ltm))* lcol * dif);// + lspe * mat_0 * pow(max(0.0, dot(hv,mn)), mat_shi) * 1.0);//dif.w);
+		out_Color = a * (max(0,dot(mn,ltm))* lcol * dif + lspe * mat_0 * pow(max(0.0, dot(hv,mn)), mat_shi) * 1.0);//dif.w);
 		//out_Color += a * (lspe * mat_0 * pow(max(0.0, dot(hv,mn)), mat_shi) * 1.0);
 	}
 }

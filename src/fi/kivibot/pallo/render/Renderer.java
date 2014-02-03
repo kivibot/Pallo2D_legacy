@@ -26,7 +26,6 @@ import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GL31;
-import org.lwjgl.opengl.GL33;
 import org.lwjgl.util.vector.Matrix3f;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
@@ -53,6 +52,8 @@ public class Renderer {
 
     private LightShadower ls = new LightShadower();
 
+    private FloatBuffer[] matbufs = new FloatBuffer[9];
+
     public Renderer(int w, int h) {
         pass0_fbo = new FBO(w, h);
 
@@ -68,7 +69,6 @@ public class Renderer {
 
         Material ma = new Material("renderer_screen", Texture.DEFAULT, AssetManager.getShader("shader0"));
         Material ma2 = new Material("renderer_screen", Texture.DEFAULT, AssetManager.getShader("light_preview"));
-        System.out.println(ma2);
 
         this.screen = new Spatial(m, ma);
         this.screen2 = new Spatial(m, ma2);
@@ -79,6 +79,10 @@ public class Renderer {
         System.out.println(this.pass2_shader);
 
         System.out.println(this.pass1_shader);
+
+        for (int i = 0; i < matbufs.length; i++) {
+            matbufs[i] = BufferUtils.createFloatBuffer(9);
+        }
 
     }
 
@@ -162,7 +166,9 @@ public class Renderer {
             GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
 
             for (Light l : lights) {
-                ls.updateLight(l);
+                if (l.getCS()) {
+                    ls.updateLight(l);
+                }
                 renderPass1(l, md);
             }
 
@@ -204,7 +210,7 @@ public class Renderer {
 
         this.updateMesh(l.getMesh());
 
-        FloatBuffer ld = BufferUtils.createFloatBuffer(9);
+        FloatBuffer ld = (FloatBuffer) this.matbufs[0].clear();
 
         Vector3f col = l.getColor();
         Vector2f pos = l.getTransform().getWorldPosition();
@@ -213,10 +219,16 @@ public class Renderer {
 
         GL20.glUniform1(GL20.glGetUniformLocation(pass1_shader.getID(), "li"), ld);
         GL20.glUniform1(GL20.glGetUniformLocation(pass1_shader.getID(), "mat"), md);
-        FloatBuffer mat0b = BufferUtils.createFloatBuffer(9);
-        l.getTransform().getWorldMatrix().store(mat0b);
+        FloatBuffer mat0b = (FloatBuffer) this.matbufs[0].clear();
+        Matrix3f ma0 = l.getTransform().getWorldMatrix();
+        ma0.m10 = 0;
+        ma0.m01 = 0;
+        ma0.m00 = 1; //cos 0
+        ma0.m11 = 1; //cos 0
+        ma0.store(mat0b);
         mat0b.flip();
-        FloatBuffer matcb = BufferUtils.createFloatBuffer(9);
+
+        FloatBuffer matcb = (FloatBuffer) this.matbufs[1].clear();
         this.main_cam.getTransform().getWorldMatrix().store(matcb);
         matcb.flip();
         GL20.glUniformMatrix3(GL20.glGetUniformLocation(pass1_shader.getID(), "mat0"), false, mat0b);
@@ -225,7 +237,7 @@ public class Renderer {
         GL20.glUniform1i(GL20.glGetUniformLocation(pass1_shader.getID(), "samp[0]"), 0);
         GL20.glUniform1i(GL20.glGetUniformLocation(pass1_shader.getID(), "samp[1]"), 1);
         GL20.glUniform1i(GL20.glGetUniformLocation(pass1_shader.getID(), "samp[2]"), 2);
-        
+
         //RENDERING
         GL30.glBindVertexArray(l.getMesh().getID());
         GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, l.getMesh().getIndiceBuffer().getID());
@@ -275,10 +287,10 @@ public class Renderer {
 
         GL20.glUniform1i(GL20.glGetUniformLocation(pass0.getID(), "matID"), id);
 
-        FloatBuffer mat0b = BufferUtils.createFloatBuffer(9);
+        FloatBuffer mat0b = (FloatBuffer) this.matbufs[0].clear();
         s.getTransform().getWorldMatrix().store(mat0b);
         mat0b.flip();
-        FloatBuffer matcb = BufferUtils.createFloatBuffer(9);
+        FloatBuffer matcb = (FloatBuffer) this.matbufs[1].clear();
         this.main_cam.getTransform().getWorldMatrix().store(matcb);
         matcb.flip();
 
@@ -301,19 +313,17 @@ public class Renderer {
         matt.m21 = 0;
         matt.m22 = 1;
 
-        FloatBuffer mattb = BufferUtils.createFloatBuffer(9);
+        FloatBuffer mattb = (FloatBuffer) this.matbufs[2].clear();
 
         matt.store(mattb);
 
         mattb.flip();
 
         GL20.glUniformMatrix3(GL20.glGetUniformLocation(pass0.getID(), "matt"), false, mattb);
-
         GL20.glUniform1i(GL20.glGetUniformLocation(pass0.getID(), "samp[0]"), 0);
         GL20.glUniform1i(GL20.glGetUniformLocation(pass0.getID(), "samp[1]"), 1);
         GL20.glUniform1i(GL20.glGetUniformLocation(pass0.getID(), "samp[2]"), 2);
-        
-        
+
         //RENDERING
         GL30.glBindVertexArray(s.getMesh().getID());
         GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, s.getMesh().getIndiceBuffer().getID());

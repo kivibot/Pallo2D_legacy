@@ -1,19 +1,31 @@
 import fi.kivibot.misc.Node;
 import fi.kivibot.pallo.PalloApp;
 import fi.kivibot.pallo.assets.AssetManager;
+import fi.kivibot.pallo.audio.AudioListener;
+import fi.kivibot.pallo.audio.AudioSource;
 import fi.kivibot.pallo.render.Light;
 import fi.kivibot.pallo.render.Material;
 import fi.kivibot.pallo.render.Mesh;
 import fi.kivibot.pallo.render.Spatial;
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.lwjgl.BufferUtils;
+import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
+import org.lwjgl.openal.AL;
+import org.lwjgl.openal.AL10;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.util.WaveData;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
@@ -40,6 +52,8 @@ public class Main extends PalloApp {
     private Light l;
     private Node ln;
 
+    private AudioListener al;
+
     @Override
     protected void Init() {
         AssetManager.addDir(new File("assets/"));
@@ -51,7 +65,7 @@ public class Main extends PalloApp {
 
         n = new Node();
         n.addChild(s);
-        s.getTransform().translate(new Vector2f(0,0));
+        s.getTransform().translate(new Vector2f(0, 0));
 
         rootNode.addChild(n);
 
@@ -77,15 +91,37 @@ public class Main extends PalloApp {
             float a = (float) (2f * Math.PI / rc * i);
             float s = (float) (Math.sin(a) * ra);
             float c = (float) (Math.cos(a) * ra);
-            l = new Light(new Vector3f(1f/rc, 1f/rc, 1f/rc));
+            l = new Light(new Vector3f(1f / rc, 1f / rc, 1f / rc));
             l.getTransform().setLocalPosition(new Vector2f(c, s));
             l.genMesh();
             ln.addChild(l);
         }
+
+        rootNode.addChild(new EpicParticles(10));
+        try {
+            AL.create();
+        } catch (LWJGLException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        al = new AudioListener(true);
+        try {
+            AudioSource as = new AudioSource(WaveData.create(new BufferedInputStream(new FileInputStream(new File("assets/test3.wav")))));
+
+            as.getTransform().setLocalPosition(new Vector2f(0, 0f));
+
+            as.play();
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
     }
 
     @Override
     protected void Update() {
+
+        al.getTransform().setLocalPosition(new Vector2f((float) Math.cos(System.currentTimeMillis() / 1000.0) * 1.5f, (float) Math.sin(System.currentTimeMillis() / 1000.0) * 1.5f));
+        al.move();
 
         x = Mouse.getX() / 400f - 1f;
         y = Mouse.getY() / 300f - 1f;
@@ -152,7 +188,7 @@ public class Main extends PalloApp {
         if (Keyboard.isKeyDown(Keyboard.KEY_M)) {
             //this.getRenderer().getMainCam().getTransform().setRotation((float) (System.currentTimeMillis() % 2000 * Math.PI / 1000f));
             //s.getTransform().setRotation((float) (System.currentTimeMillis() % 2000 * Math.PI / 1000f));
-            ln.getTransform().setRotation((float) (System.currentTimeMillis() % 2000 * Math.PI / 1000f));
+            ln.getParent().getTransform().setRotation((float) (System.currentTimeMillis() % 2000 * Math.PI / 1000f));
         }
         if (Keyboard.isKeyDown(Keyboard.KEY_UP)) {
             s.getTransform().translate(new Vector2f(0, 0.01f));
@@ -160,6 +196,9 @@ public class Main extends PalloApp {
         }
         if (Keyboard.isKeyDown(Keyboard.KEY_DOWN)) {
             s.getTransform().translate(new Vector2f(0, -0.01f));
+        }
+        if (Keyboard.isKeyDown(Keyboard.KEY_G)) {
+            rootNode.addChild(new EpicParticles(10));
         }
         if (Keyboard.isKeyDown(Keyboard.KEY_NUMPAD4)) {
             GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE);

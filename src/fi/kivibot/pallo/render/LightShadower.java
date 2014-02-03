@@ -9,6 +9,8 @@ import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.FixtureDef;
 import org.jbox2d.dynamics.World;
 import org.lwjgl.BufferUtils;
+import org.lwjgl.util.vector.Matrix3f;
+import org.lwjgl.util.vector.Vector3f;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -23,7 +25,7 @@ public class LightShadower implements RayCastCallback {
 
     private World w;
     private Vec2 rcep;
-    
+
     public LightShadower() {
         w = new World(new Vec2());
 
@@ -34,7 +36,7 @@ public class LightShadower implements RayCastCallback {
             fd.shape = sd;
 
             BodyDef bd = new BodyDef();
-            bd.position = new Vec2(0.1f*i, 0.0f);
+            bd.position = new Vec2(0.1f * i, 0.0f);
             w.createBody(bd).createFixture(fd);
         }
     }
@@ -45,12 +47,14 @@ public class LightShadower implements RayCastCallback {
 
     public void updateLight(Light l) {
         FloatBuffer fb = BufferUtils.createFloatBuffer(2 * l.getRC() + 2);
-        
+
         Vec2 pos = new Vec2(l.getTransform().getWorldPosition().getX(), l.getTransform().getWorldPosition().getY());
         fb.put(new float[]{0, 0});
         for (int i = 0; i < l.getRC(); i++) {
             float a = (l.getFOL() / (float) (l.getRC() - 1)) * i;
             Vec2 ret = this.calcRay(pos, new Vec2((float) Math.cos(a), (float) Math.sin(a)).mul(l.getRange()));
+            Vector3f cb = new Vector3f(), s = new Vector3f(ret.x, ret.y, 0);
+            Matrix3f.transform(l.getTransform().getLocalMatrix(), s, cb);
             fb.put(new float[]{ret.x, ret.y});
         }
         fb.flip();
