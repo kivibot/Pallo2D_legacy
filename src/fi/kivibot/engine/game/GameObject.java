@@ -11,9 +11,20 @@ import fi.kivibot.misc.Node;
  *
  * @author kivi
  */
-public abstract class GameObject extends Node{
-    
+public abstract class GameObject extends Node {
+
+    private boolean initialized = false;
+
+    public boolean isInitialized() {
+        return initialized;
+    }
+
+    public void setAsInitialized() {
+        initialized = true;
+    }
+
     public abstract boolean Init();
+
     public abstract boolean Update();
-    
+
 }

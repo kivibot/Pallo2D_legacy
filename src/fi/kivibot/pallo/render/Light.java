@@ -22,7 +22,7 @@ public class Light extends Node {
     private Mesh m;
 
     private float fol = (float) (Math.PI * 2);
-    private int rays = 2555;
+    private int rays = 2560;
     private float height = 0.5f;
     private float range = 01.7f;
     private boolean cs = true;
@@ -91,9 +91,11 @@ public class Light extends Node {
             float y = (float) (l * Math.sin(a));
             fb.put(new float[]{x, y});
 
-            ib.put(0);
-            ib.put(i + 1);
-            ib.put(i + 2);
+            if (i != this.rays - 1) {
+                ib.put(0);
+                ib.put(i + 1);
+                ib.put(i + 2);
+            }
         }
         fb.flip();
         ib.flip();

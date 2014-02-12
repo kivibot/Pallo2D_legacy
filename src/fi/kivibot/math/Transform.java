@@ -23,7 +23,6 @@ public class Transform {
 
     private Transform parent;
 
-    
     public Transform(Vector2f p) {
         pos = p;
         mat.m22 = 1;
@@ -48,7 +47,7 @@ public class Transform {
     }
 
     private void updateTranslationPart() {
-        
+
         //LWJGL
         mat.m20 = pos.x;
         mat.m21 = pos.y;
@@ -69,7 +68,7 @@ public class Transform {
     public Matrix3f getWorldMatrix() {
         Matrix3f ret = new Matrix3f();
         if (this.parent != null) {
-            Matrix3f.mul(this.getLocalMatrix(), this.parent.getWorldMatrix(), ret);
+            Matrix3f.mul(this.parent.getWorldMatrix(), this.getLocalMatrix(), ret);
         } else {
             ret = this.getLocalMatrix();
         }
@@ -92,7 +91,7 @@ public class Transform {
         mat.m11 = cos * sca.y;
     }
 
-    public void scale(float x, float y) {
+    public void setScale(float x, float y) {
         sca.x = x;
         sca.y = y;
 

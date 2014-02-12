@@ -18,6 +18,9 @@ uniform vec2 screen;
 uniform float mat[matcount*matsize];      
 uniform float li[lightcount*lightsize];
 
+uniform float attenuationSquare;
+uniform float attenuationLinear;
+
 out vec3 out_Color;
 out vec3 out_Spec;
 
@@ -47,7 +50,7 @@ void main(void) {
 	
 		float d = length(ltm);
 	
-		float a = 1.0 / ((d*0.1+d*d*2));
+		float a = 1.0 / ((d*attenuationLinear + pow(d,2)*attenuationSquare));
 	
 		ltm /= d;
 		

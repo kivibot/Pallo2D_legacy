@@ -5,6 +5,7 @@
  */
 package fi.kivibot.misc;
 
+import java.util.LinkedList;
 import org.lwjgl.Sys;
 
 /**
@@ -17,20 +18,29 @@ public class FPSCounter {
 
     private float avgtime, rate;
 
+    private LinkedList<Integer> times = new LinkedList<>();
+
     public FPSCounter(int s) {
         steps = s;
         time = (int) ((Sys.getTime() * 1000) / Sys.getTimerResolution());
+        for(int i=0; i<s; i++){
+            times.add(0);
+        }
     }
 
     public void update() {
-        if (count == steps) {
-            time = (int) ((Sys.getTime() * 1000) / Sys.getTimerResolution()) - time;
-            avgtime = (float) time / (float) (steps);
-            rate = 1000.0f / avgtime;
-            time = (int) ((Sys.getTime() * 1000) / Sys.getTimerResolution());
-            count = 0;
+        long time2 = (int) ((Sys.getTime() * 1000) / Sys.getTimerResolution()) - time;
+        times.add(Integer.valueOf((int) time2));
+        time = (int) ((Sys.getTime() * 1000) / Sys.getTimerResolution());
+        if (times.size() > getFrameRate()) {
+            times.removeFirst();
         }
-        count++;
+        long t = 0;
+        for (Integer i : times) {
+            t += i;
+        }
+        avgtime = (float) t / (float) (times.size());
+        rate = 1000.0f / avgtime;
     }
 
     public float getFrameRate() {
