@@ -3,9 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package fi.kivibot.pallo.render;
+package fi.kivibot.pallo.rendering.light;
 
-import fi.kivibot.misc.Node;
+import fi.kivibot.pallo.rendering.Mesh;
+import fi.kivibot.pallo.rendering.VertexBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import org.lwjgl.BufferUtils;
@@ -15,36 +16,15 @@ import org.lwjgl.util.vector.Vector3f;
  *
  * @author kivi
  */
-public class Light extends Node {
-
-    private Vector3f color;
-
-    private Mesh m;
+public class PointLight extends Light {
 
     private float fol = (float) (Math.PI * 2);
     private int rays = 2560;
     private float height = 0.5f;
     private float range = 01.7f;
-    private boolean cs = true;
 
-    public Light(Vector3f c) {
-        color = c;
-    }
-
-    public Vector3f getColor() {
-        return color;
-    }
-
-    public void setColor(Vector3f c) {
-        color = c;
-    }
-
-    public Mesh getMesh() {
-        return m;
-    }
-
-    public void setMesh(Mesh me) {
-        m = me;
+    public PointLight(Vector3f c) {
+        super(c, Type.POINT);
     }
 
     public float getFOL() {
@@ -104,14 +84,6 @@ public class Light extends Node {
         vb.setData(fb);
         vib.setData(ib);
         this.m = new Mesh(vb, vb, vib);
-    }
-
-    public void setCS(boolean b) {
-        cs = b;
-    }
-
-    public boolean getCS() {
-        return cs;
     }
 
 }

@@ -5,11 +5,11 @@
  */
 package fi.kivibot.pallo.assets;
 
-import fi.kivibot.pallo.render.Material;
-import fi.kivibot.pallo.render.Mesh;
-import fi.kivibot.pallo.render.Shader;
-import fi.kivibot.pallo.render.Texture;
-import fi.kivibot.pallo.render.VertexBuffer;
+import fi.kivibot.pallo.rendering.Material;
+import fi.kivibot.pallo.rendering.Mesh;
+import fi.kivibot.pallo.rendering.Shader;
+import fi.kivibot.pallo.rendering.Texture;
+import fi.kivibot.pallo.rendering.VertexBuffer;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
@@ -46,15 +46,16 @@ public class AssetManager {
     private static final HashMap<String, Texture> textures = new HashMap<>();
     private static final HashMap<String, Mesh> meshes = new HashMap<>();
 
-    private static final HashMap<String, Integer> shader_part = new HashMap<>();
+    private static final HashMap<String, String> shader_parts = new HashMap<>();
     private static final HashMap<String, JSONObject> shader_prog = new HashMap<>();
 
     private static final HashMap<String, InputStream> tex_stream = new HashMap<>();
 
-    private static final int minVer = 1, maxVer = 3;
+    private static final int minVer = 1, maxVer = 4;
 
     public static void addFile(File f) {
         if (f.isDirectory()) {
+            addDir(f);
             return;
         }
 
@@ -77,6 +78,7 @@ public class AssetManager {
 
     public static void addDir(File f) {
         if (f.isFile()) {
+            addFile(f);
             return;
         }
         for (File fi : f.listFiles()) {
@@ -111,13 +113,38 @@ public class AssetManager {
             //try to make
             JSONObject jso = shader_prog.get(key);
             if (jso != null) {
-                Integer ve = shader_part.get(jso.getString("vertex"));
-                Integer fr = shader_part.get(jso.getString("fragment"));
+                String ve = shader_parts.get(jso.getString("vertex"));
+                String fr = shader_parts.get(jso.getString("fragment"));
+
                 if (ve != null && fr != null) {
+
+                    String[] defines;
+
+                    if (jso.getInt("version") >= 4) {
+                        JSONArray jsoa = jso.getJSONArray("defines");
+                        defines = new String[jsoa.length()];
+                        for (int i = 0; i < jsoa.length(); i++) {
+                            defines[i] = jsoa.getString(i);
+                        }
+                    } else {
+                        defines = new String[0];
+                    }
+
+                    int veid = AssetManager.compileShader(ve, "vert", defines);
+                    if (veid == -1) {
+                        System.out.println("Could not compile shader :\\");
+                        return null;
+                    }
+                    int frid = AssetManager.compileShader(fr, "frag", defines);
+                    if (frid == -1) {
+                        System.out.println("Could not compile shader :/");
+                        return null;
+                    }
+
                     int sid = GL20.glCreateProgram();
 
-                    GL20.glAttachShader(sid, ve.intValue());
-                    GL20.glAttachShader(sid, fr.intValue());
+                    GL20.glAttachShader(sid, veid);
+                    GL20.glAttachShader(sid, frid);
 
                     if (jso.getInt("version") >= 3) {
                         JSONArray jsa = jso.getJSONArray("varloc");
@@ -219,9 +246,6 @@ public class AssetManager {
         for (Shader s : shaders.values()) {
             GL20.glDeleteProgram(s.getID());
         }
-        for (Integer i : shader_part.values()) {
-            GL20.glDeleteShader(i.intValue());
-        }
     }
 
     private static void wipeAllCPUAssets() {
@@ -229,7 +253,7 @@ public class AssetManager {
         shaders.clear();
         textures.clear();
 
-        shader_part.clear();
+        shader_parts.clear();
         shader_prog.clear();
         tex_stream.clear();
     }
@@ -239,7 +263,7 @@ public class AssetManager {
         wipeAllCPUAssets();
     }
 
-    private static void loadShader(String raw, String name, String type) {
+    private static int compileShader(String raw_, String type, String[] defines) {
         int sid;
         switch (type) {
             case "frag":
@@ -249,8 +273,14 @@ public class AssetManager {
                 sid = GL20.glCreateShader(GL20.GL_VERTEX_SHADER);
                 break;
             default:
-                return;
+                System.out.println("No such type: " + type);
+                return -1;
         }
+        String raw = "";
+        for (String s : defines) {
+            raw += "#define " + s + "\n";
+        }
+        raw += raw_;
         GL20.glShaderSource(sid, raw);
         GL20.glCompileShader(sid);
         int err = GL20.glGetShaderi(sid, GL20.GL_COMPILE_STATUS);
@@ -264,9 +294,13 @@ public class AssetManager {
             } catch (InterruptedException ex) {
                 Logger.getLogger(AssetManager.class.getName()).log(Level.SEVERE, null, ex);
             }
-            return;
+            return -1;
         }
-        shader_part.put(name + "." + type, new Integer(sid));
+        return sid;
+    }
+
+    private static void loadShader(String raw, String name, String type) {
+        shader_parts.put(name + "." + type, raw);
     }
 
     private static void loadMesh(String instr, String name) {
@@ -332,7 +366,7 @@ public class AssetManager {
     public static String status() {
         return textures.size() + "/" + tex_stream.size() + " Textures, "
                 + shaders.size() + "/" + shader_prog.size() + " Shaders ["
-                + shader_part.size() + "], " + materials.size() + " Materials";
+                + shader_parts.size() + "], " + materials.size() + " Materials";
     }
 
     private static Texture loadTex(InputStream is, String name) {

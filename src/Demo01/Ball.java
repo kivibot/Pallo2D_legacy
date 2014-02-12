@@ -2,8 +2,9 @@ package Demo01;
 
 import fi.kivibot.engine.game.GameObject;
 import fi.kivibot.pallo.assets.AssetManager;
-import fi.kivibot.pallo.render.Light;
-import fi.kivibot.pallo.render.Spatial;
+import fi.kivibot.pallo.rendering.light.Light;
+import fi.kivibot.pallo.rendering.Spatial;
+import fi.kivibot.pallo.rendering.light.PointLight;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
@@ -14,7 +15,7 @@ import org.lwjgl.util.vector.Vector3f;
 public class Ball extends GameObject {
 
     private Spatial gfx;
-    private Light li;
+    private PointLight li;
 
     private Vector2f velo = new Vector2f((float) Math.random() * 10, (float) Math.random() * 10);
 
@@ -23,7 +24,7 @@ public class Ball extends GameObject {
         gfx = new Spatial(AssetManager.getMesh("ball"), AssetManager.getMaterial("ball"));
         gfx.getTransform().setScale(10, 10);
         this.addChild(gfx);
-        li = new Light(new Vector3f(0f, 1f, 1f));
+        li = new PointLight(new Vector3f(0f, 1f, 1f));
         li.setCS(true);
         li.setRange(800f);
         li.genMesh();

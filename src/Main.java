@@ -3,10 +3,10 @@ import fi.kivibot.pallo.PalloApp;
 import fi.kivibot.pallo.assets.AssetManager;
 import fi.kivibot.pallo.audio.AudioListener;
 import fi.kivibot.pallo.audio.AudioSource;
-import fi.kivibot.pallo.render.Light;
-import fi.kivibot.pallo.render.Material;
-import fi.kivibot.pallo.render.Mesh;
-import fi.kivibot.pallo.render.Spatial;
+import fi.kivibot.pallo.rendering.light.PointLight;
+import fi.kivibot.pallo.rendering.Material;
+import fi.kivibot.pallo.rendering.Mesh;
+import fi.kivibot.pallo.rendering.Spatial;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -23,8 +23,8 @@ import org.lwjgl.util.WaveData;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
-
 import Demo01.PalloDemo01;
+import fi.kivibot.pallo.rendering.light.AmbientLight;
 
 
 /*
@@ -48,7 +48,7 @@ public class Main extends PalloApp {
     private float x = 0, y = 0;
 
     private int ic = 1;
-    private Light l;
+    private PointLight l;
     private Node ln;
 
     private AudioListener al;
@@ -69,7 +69,7 @@ public class Main extends PalloApp {
         rootNode.addChild(n);
 
         for (int i = 0; i < 0; i++) {
-            l = new Light(new Vector3f((float) Math.random(), (float) Math.random(), (float) Math.random()));
+            l = new PointLight(new Vector3f((float) Math.random(), (float) Math.random(), (float) Math.random()));
             l.getTransform().setLocalPosition(new Vector2f((float) (Math.random() * 2 - 1), (float) (Math.random() * 2 - 1)));
             l.setHeight(1);
             l.genMesh();
@@ -79,18 +79,18 @@ public class Main extends PalloApp {
         ln = new Node();
         rootNode.addChild(ln);
         /*
-         l = new Light(new Vector3f(1, 1, 1));
+         l = new PointLight(new Vector3f(1, 1, 1));
          l.getTransform().setLocalPosition(new Vector2f(0, 0));
          l.genMesh();
          ln.addChild(l);
          */
         float rc = 1;
         float ra = 0.01f;
-        for (int i = 0; i < rc; i++) {
+        for (int i = 0; i < 0; i++) {
             float a = (float) (2f * Math.PI / rc * i);
             float s = (float) (Math.sin(a) * ra);
             float c = (float) (Math.cos(a) * ra);
-            l = new Light(new Vector3f(1f / rc, 1f / rc, 1f / rc));
+            l = new PointLight(new Vector3f(1f / rc, 1f / rc, 1f / rc));
             l.getTransform().setLocalPosition(new Vector2f(c, s));
             l.genMesh();
             ln.addChild(l);
@@ -117,6 +117,8 @@ public class Main extends PalloApp {
         } catch (FileNotFoundException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
+
+        rootNode.addChild(new AmbientLight(new Vector3f()));
 
     }
 
@@ -214,7 +216,7 @@ public class Main extends PalloApp {
             } catch (InterruptedException ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
-            l = new Light(new Vector3f((float) Math.random(), (float) Math.random(), (float) Math.random()));
+            l = new PointLight(new Vector3f((float) Math.random(), (float) Math.random(), (float) Math.random()));
             l.getTransform().setLocalPosition(new Vector2f((float) (Math.random() * 2 - 1), (float) (Math.random() * 2 - 1)));
             l.setHeight(1);
             l.genMesh();

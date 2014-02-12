@@ -1,4 +1,4 @@
-package fi.kivibot.pallo.render;
+package fi.kivibot.pallo.rendering.light;
 
 import java.nio.FloatBuffer;
 import java.util.LinkedList;
@@ -61,7 +61,12 @@ public class LightShadower implements RayCastCallback {
         return w;
     }
 
-    public void updateLight(Light l) {
+    public void updateLight(Light l_) {
+        if (l_.getType() != Light.Type.POINT) {
+            return;
+        }
+        PointLight l = (PointLight) l_;
+
         FloatBuffer fb = BufferUtils.createFloatBuffer(2 * l.getRC() + 2);
 
         Vec2 pos = new Vec2(l.getTransform().getWorldPosition().getX(), l.getTransform().getWorldPosition().getY());

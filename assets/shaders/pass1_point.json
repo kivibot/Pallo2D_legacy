@@ -1,0 +1,14 @@
+{
+	"version": 4,
+	"type": "shader",
+	"name": "pass1_point",
+	"vertex": "pass1.vert",
+	"fragment": "pass1.frag",
+	"varloc": [
+		{ "name":"out_Color", "id":0, "type":"frag" },
+		{ "name":"out_Spec", "id":1, "type":"frag"}
+	],
+	"defines": [
+		"POINT"
+	]
+}

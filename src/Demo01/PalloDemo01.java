@@ -3,13 +3,16 @@ package Demo01;
 import fi.kivibot.misc.Node;
 import fi.kivibot.pallo.PalloApp;
 import fi.kivibot.pallo.assets.AssetManager;
-import fi.kivibot.pallo.render.Spatial;
+import fi.kivibot.pallo.rendering.Spatial;
+import fi.kivibot.pallo.rendering.light.AmbientLight;
+import fi.kivibot.pallo.rendering.light.DirectionalLight;
 import java.io.File;
 import java.util.List;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
+import org.lwjgl.util.vector.Vector3f;
 
 /**
  *
@@ -26,19 +29,17 @@ public class PalloDemo01 extends PalloApp {
 
     private List<Brick> bricks;
     private List<Ball> balls;
-    
+
     private Node ln;
 
     @Override
     protected void Init() {
         this.getRenderer().getMainCam().setViewSize(800, 600);
         AssetManager.addDir(new File("assets_001"));
-        AssetManager.addDir(new File("assets"));
 
         Spatial s = new Spatial(AssetManager.getMesh("mesh"), AssetManager.getMaterial("apina"));
         s.getTransform().setScale(800, 600);
         rootNode.addChild(s);
-
         this.initGame();
     }
 
@@ -64,10 +65,11 @@ public class PalloDemo01 extends PalloApp {
                 rootNode.addChild(b);
             }
         }
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < 40; i++) {
             ln = new Ball();
             rootNode.addChild(ln);
         }
+        rootNode.addChild(new DirectionalLight(new Vector3f(0.3f, 0.3f, 0.3f), new Vector3f(-1, 1, -1)));
     }
 
 }

@@ -7,8 +7,8 @@ package Demo01;
 
 import fi.kivibot.engine.game.GameObject;
 import fi.kivibot.pallo.assets.AssetManager;
-import fi.kivibot.pallo.render.Light;
-import fi.kivibot.pallo.render.Spatial;
+import fi.kivibot.pallo.rendering.light.Light;
+import fi.kivibot.pallo.rendering.Spatial;
 import org.lwjgl.util.vector.Vector3f;
 
 /**

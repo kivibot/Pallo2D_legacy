@@ -10,7 +10,7 @@ import fi.kivibot.misc.FPSCounter;
 import fi.kivibot.misc.Node;
 import fi.kivibot.pallo.assets.AssetManager;
 import fi.kivibot.pallo.audio.AudioEngine;
-import fi.kivibot.pallo.render.Renderer;
+import fi.kivibot.pallo.rendering.Renderer;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.logging.Level;

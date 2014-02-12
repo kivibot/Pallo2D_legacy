@@ -1,5 +1,5 @@
 import fi.kivibot.engine.game.GameObject;
-import fi.kivibot.pallo.render.Light;
+import fi.kivibot.pallo.rendering.light.PointLight;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.common.Vec3;
 import org.lwjgl.input.Keyboard;
@@ -18,18 +18,18 @@ import org.lwjgl.util.vector.Vector3f;
  */
 public class EpicParticles extends GameObject {
 
-    private Light[] lights;
+    private PointLight[] lights;
     private Vec2[] velos;
     private Vec2 lol = new Vec2(0, 0);
     private Vec2 g = new Vec2(0, -0.0005f);
 
     public EpicParticles(int n) {
-        this.lights = new Light[n];
+        this.lights = new PointLight[n];
         this.velos = new Vec2[n];
         for (int i = 0; i < n; i++) {
             Vec3 v = new Vec3((float) Math.random(), (float) Math.random(), (float) Math.random());
             v.mul(1.0f / (float) Math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z));
-            this.lights[i] = new Light(new Vector3f(v.x, v.y, v.z));
+            this.lights[i] = new PointLight(new Vector3f(v.x, v.y, v.z));
             this.lights[i].setRange(0.005f);
             this.lights[i].setRC(8);
             this.lights[i].genMesh();

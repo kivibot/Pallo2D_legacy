@@ -3,14 +3,18 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package fi.kivibot.pallo.render;
+package fi.kivibot.pallo.rendering;
 
+import fi.kivibot.pallo.rendering.light.Light;
+import fi.kivibot.pallo.rendering.light.LightShadower;
 import fi.kivibot.math.Rect;
 import fi.kivibot.misc.Node;
 import fi.kivibot.pallo.assets.AssetManager;
-import fi.kivibot.pallo.render.VertexBuffer.Target;
-import fi.kivibot.pallo.render.VertexBuffer.Type;
-import fi.kivibot.pallo.render.VertexBuffer.Usage;
+import fi.kivibot.pallo.rendering.VertexBuffer.Target;
+import fi.kivibot.pallo.rendering.VertexBuffer.Type;
+import fi.kivibot.pallo.rendering.VertexBuffer.Usage;
+import fi.kivibot.pallo.rendering.light.DirectionalLight;
+import fi.kivibot.pallo.rendering.light.PointLight;
 import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -42,7 +46,7 @@ public class Renderer {
     private Rect screenBounds = new Rect(-10.75f, -10.75f, 111.5f, 111.5f);
     private int objc;
     private Spatial screen, screen2;
-    private Shader pass1_shader, pass2_shader;
+    private Shader pass1_point_shader, pass1_directional_shader, pass1_ambient_shader, pass2_shader;
     private VertexBuffer lightbuf = new VertexBuffer(Type.Float, Usage.Dynamic, Target.Uniform);
 
     private FBO pass0_fbo;
@@ -76,12 +80,17 @@ public class Renderer {
         this.screen = new Spatial(m, ma);
         this.screen2 = new Spatial(m, ma2);
 
-        pass1_shader = AssetManager.getShader("pass1");
+        pass1_point_shader = AssetManager.getShader("pass1_point");
+        pass1_directional_shader = AssetManager.getShader("pass1_directional");
+        pass1_ambient_shader = AssetManager.getShader("pass1_ambient");
+
         pass2_shader = AssetManager.getShader("pass2");
 
         System.out.println(this.pass2_shader);
 
-        System.out.println(this.pass1_shader);
+        System.out.println(this.pass1_point_shader);
+        System.out.println(this.pass1_directional_shader);
+        System.out.println(this.pass1_ambient_shader);
 
         for (int i = 0; i < matbufs.length; i++) {
             matbufs[i] = BufferUtils.createFloatBuffer(9);
@@ -205,7 +214,25 @@ public class Renderer {
 
     private void renderPass1(Light l, FloatBuffer md) {
         //BINDING
-        if (!this.bindShader(pass1_shader)) {
+
+        Shader s = null;
+
+        switch (l.getType()) {
+            case POINT:
+                s = this.pass1_point_shader;
+                break;
+            case DIRECTIONAL:
+                s = this.pass1_directional_shader;
+                break;
+            case AMBIENT:
+                s = this.pass1_ambient_shader;
+                break;
+            default:
+                System.out.println("No such type");
+                return;
+        }
+
+        if (!this.bindShader(s)) {
             //NOPE
             System.out.println("Could not bind shader");
             return;
@@ -213,42 +240,58 @@ public class Renderer {
 
         this.updateMesh(l.getMesh());
 
-        FloatBuffer ld = (FloatBuffer) this.matbufs[0].clear();
+        switch (l.getType()) {
+            case POINT:
+                FloatBuffer ld = (FloatBuffer) this.matbufs[0].clear();
+                Vector3f col = l.getColor();
+                Vector2f pos = l.getTransform().getWorldPosition();
+                ld.put(new float[]{col.x, col.y, col.z, pos.x, pos.y, ((PointLight) l).getHeight(), col.x, col.y, col.z});
+                ld.flip();
+                GL20.glUniform1(GL20.glGetUniformLocation(s.getID(), "li"), ld);
+                GL20.glUniform1(GL20.glGetUniformLocation(s.getID(), "mat"), md);
+                FloatBuffer mat0b = (FloatBuffer) this.matbufs[0].clear();
+                Matrix3f ma0 = l.getTransform().getWorldMatrix();
+                ma0.m10 = 0;
+                ma0.m01 = 0;
+                ma0.m00 = 1; //cos 0
+                ma0.m11 = 1; //cos 0
+                ma0.store(mat0b);
+                mat0b.flip();
+                FloatBuffer matcb = (FloatBuffer) this.matbufs[1].clear();
+                this.main_cam.getTransform().getWorldMatrix().store(matcb);
+                matcb.flip();
+                GL20.glUniformMatrix3(GL20.glGetUniformLocation(s.getID(), "mat0"), false, mat0b);
+                GL20.glUniformMatrix3(GL20.glGetUniformLocation(s.getID(), "matc"), false, matcb);
+                GL20.glUniform1f(GL20.glGetUniformLocation(s.getID(), "attenuationSquare"), 0.000100f);
+                GL20.glUniform1f(GL20.glGetUniformLocation(s.getID(), "attenuationLinear"), 0.000000f);
+                break;
+            case DIRECTIONAL:
+                ld = (FloatBuffer) this.matbufs[0].clear();
+                col = l.getColor();
+                Vector3f dir = ((DirectionalLight)l).getDirection();
+                ld.put(new float[]{col.x, col.y, col.z, dir.x, dir.y, dir.z, col.x, col.y, col.z});
+                ld.flip();
+                GL20.glUniform1(GL20.glGetUniformLocation(s.getID(), "li"), ld);
+                break;
+            case AMBIENT:
+                ld = (FloatBuffer) this.matbufs[0].clear();
+                col = l.getColor();
+                ld.put(new float[]{col.x, col.y, col.z, 0, 0, 0, 0, 0, 0});
+                ld.flip();
+                GL20.glUniform1(GL20.glGetUniformLocation(s.getID(), "li"), ld);
+                break;
+        }
 
-        Vector3f col = l.getColor();
-        Vector2f pos = l.getTransform().getWorldPosition();
-        ld.put(new float[]{col.x, col.y, col.z, pos.x, pos.y, l.getHeight(), col.x, col.y, col.z});
-        ld.flip();
-
-        GL20.glUniform1(GL20.glGetUniformLocation(pass1_shader.getID(), "li"), ld);
-        GL20.glUniform1(GL20.glGetUniformLocation(pass1_shader.getID(), "mat"), md);
-        FloatBuffer mat0b = (FloatBuffer) this.matbufs[0].clear();
-        Matrix3f ma0 = l.getTransform().getWorldMatrix();
-        ma0.m10 = 0;
-        ma0.m01 = 0;
-        ma0.m00 = 1; //cos 0
-        ma0.m11 = 1; //cos 0
-        ma0.store(mat0b);
-        mat0b.flip();
-
-        FloatBuffer matcb = (FloatBuffer) this.matbufs[1].clear();
-        this.main_cam.getTransform().getWorldMatrix().store(matcb);
-        matcb.flip();
-        GL20.glUniformMatrix3(GL20.glGetUniformLocation(pass1_shader.getID(), "mat0"), false, mat0b);
-        GL20.glUniformMatrix3(GL20.glGetUniformLocation(pass1_shader.getID(), "matc"), false, matcb);
-
-        GL20.glUniform1i(GL20.glGetUniformLocation(pass1_shader.getID(), "samp[0]"), 0);
-        GL20.glUniform1i(GL20.glGetUniformLocation(pass1_shader.getID(), "samp[1]"), 1);
-        GL20.glUniform1i(GL20.glGetUniformLocation(pass1_shader.getID(), "samp[2]"), 2);
-
-        GL20.glUniform1f(GL20.glGetUniformLocation(pass1_shader.getID(), "attenuationSquare"), 0.000100f);
-        GL20.glUniform1f(GL20.glGetUniformLocation(pass1_shader.getID(), "attenuationLinear"), 0.000000f);
+        //set sampler pointers
+        GL20.glUniform1i(GL20.glGetUniformLocation(s.getID(), "samp[0]"), 0);
+        GL20.glUniform1i(GL20.glGetUniformLocation(s.getID(), "samp[1]"), 1);
+        GL20.glUniform1i(GL20.glGetUniformLocation(s.getID(), "samp[2]"), 2);
 
         //RENDERING
         GL30.glBindVertexArray(l.getMesh().getID());
         GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, l.getMesh().getIndiceBuffer().getID());
         GL11.glDrawElements(GL11.GL_TRIANGLES, l.getMesh().getIndiceBuffer().getData().capacity(), GL11.GL_UNSIGNED_INT, 0);
-
+        
     }
 
     private void renderSpatialPass0(Spatial s) {
