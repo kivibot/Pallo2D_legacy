@@ -11,6 +11,7 @@ import fi.kivibot.pallo.assets.AssetManager;
 import fi.kivibot.pallo.render.VertexBuffer.Target;
 import fi.kivibot.pallo.render.VertexBuffer.Type;
 import fi.kivibot.pallo.render.VertexBuffer.Usage;
+import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -55,6 +56,8 @@ public class Renderer {
     private FloatBuffer[] matbufs = new FloatBuffer[9];
 
     public Renderer(int w, int h) {
+        AssetManager.addDir(new File("assets"));
+
         pass0_fbo = new FBO(w, h);
 
         main_cam = new Camera(w, h);
@@ -238,6 +241,9 @@ public class Renderer {
         GL20.glUniform1i(GL20.glGetUniformLocation(pass1_shader.getID(), "samp[1]"), 1);
         GL20.glUniform1i(GL20.glGetUniformLocation(pass1_shader.getID(), "samp[2]"), 2);
 
+        GL20.glUniform1f(GL20.glGetUniformLocation(pass1_shader.getID(), "attenuationSquare"), 0.000100f);
+        GL20.glUniform1f(GL20.glGetUniformLocation(pass1_shader.getID(), "attenuationLinear"), 0.000000f);
+
         //RENDERING
         GL30.glBindVertexArray(l.getMesh().getID());
         GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, l.getMesh().getIndiceBuffer().getID());
@@ -302,13 +308,16 @@ public class Renderer {
         Matrix3f.transform(s.getTransform().getWorldMatrix(), new Vector3f(1, 0, 0), ta);
         Matrix3f.transform(s.getTransform().getWorldMatrix(), new Vector3f(0, 1, 0), bita);
 
+        float talen = (float) Math.sqrt(Math.pow(ta.x, 2) + Math.pow(ta.y, 2));
+        float bitalen = (float) Math.sqrt(Math.pow(bita.x, 2) + Math.pow(bita.y, 2));
+
         Matrix3f matt = new Matrix3f();
-        matt.m00 = ta.x;
-        matt.m01 = ta.y;
-        matt.m02 = ta.z;
-        matt.m10 = bita.x;
-        matt.m11 = bita.y;
-        matt.m12 = bita.z;
+        matt.m00 = ta.x / talen;
+        matt.m01 = ta.y / talen;
+        matt.m02 = ta.z / talen;
+        matt.m10 = bita.x / bitalen;
+        matt.m11 = bita.y / bitalen;
+        matt.m12 = bita.z / bitalen;
         matt.m20 = 0;
         matt.m21 = 0;
         matt.m22 = 1;

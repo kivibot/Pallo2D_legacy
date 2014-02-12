@@ -13,9 +13,18 @@ import fi.kivibot.misc.Node;
  */
 public class Camera extends Node {
 
-    public Camera(int w, int h) {
-        float a = (float) w / (float) h;
-        this.getTransform().scale(1, a);
+    private int screen_width, screen_height;
+    private float ratio;
+
+    public Camera(int sw, int sh) {
+        screen_width = sw;
+        screen_height = sh;
+        ratio = (float) sw / (float) sh;
+        this.getTransform().setScale(1, ratio);
+    }
+
+    public void setViewSize(int w, int h) {
+        this.getTransform().setScale((float) 2f / (float) w, 2f / (float) h);
     }
 
 }

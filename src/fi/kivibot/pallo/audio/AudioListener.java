@@ -27,10 +27,6 @@ public class AudioListener extends Node {
         pos = (FloatBuffer) BufferUtils.createFloatBuffer(3).rewind();
         vel = (FloatBuffer) BufferUtils.createFloatBuffer(3).put(0).rewind();
         ori = (FloatBuffer) BufferUtils.createFloatBuffer(6).rewind();
-
-        AL10.alListener(AL10.AL_POSITION, this.getPositionBuffer());
-        AL10.alListener(AL10.AL_VELOCITY, this.getVelocityBuffer());
-        AL10.alListener(AL10.AL_ORIENTATION, this.getOrientationBuffer());
     }
 
     public FloatBuffer getPositionBuffer() {
@@ -57,9 +53,5 @@ public class AudioListener extends Node {
         }
         ori.rewind();
         return ori;
-    }
-    
-    public void move(){
-        AL10.alListener(AL10.AL_POSITION, this.getPositionBuffer());
     }
 }

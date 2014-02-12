@@ -23,6 +23,7 @@ public class AudioSource extends Node {
 
     private FloatBuffer pos, vel;
     private int buffer, source;
+    private boolean startRequested, stopRequested;
 
     public AudioSource(WaveData wd) {
 
@@ -40,8 +41,6 @@ public class AudioSource extends Node {
         AL10.alSourcei(source, AL10.AL_BUFFER, buffer);
         AL10.alSourcef(source, AL10.AL_PITCH, 1.0f);
         AL10.alSourcef(source, AL10.AL_GAIN, 1.0f);
-        AL10.alSource(source, AL10.AL_POSITION, this.getPositionBuffer());
-        AL10.alSource(source, AL10.AL_VELOCITY, this.getVelocityBuffer());
     }
 
     public FloatBuffer getPositionBuffer() {
@@ -57,8 +56,27 @@ public class AudioSource extends Node {
     }
 
     public void play() {
-        AL10.alSource(source, AL10.AL_POSITION, this.getPositionBuffer());
-        AL10.alSource(source, AL10.AL_VELOCITY, this.getVelocityBuffer());
-        AL10.alSourcePlay(source);
+        this.startRequested = true;
+    }
+
+    public void stop() {
+        this.stopRequested = true;
+    }
+
+    public int getSourceID() {
+        return this.source;
+    }
+
+    public boolean isStartRequested() {
+        return this.startRequested;
+    }
+
+    public boolean isStopRequested() {
+        return this.stopRequested;
+    }
+
+    public void clearRequests() {
+        this.startRequested = false;
+        this.stopRequested = false;
     }
 }

@@ -1,15 +1,23 @@
 package fi.kivibot.pallo.render;
 
 import java.nio.FloatBuffer;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.jbox2d.callbacks.RayCastCallback;
+import org.jbox2d.collision.RayCastInput;
+import org.jbox2d.collision.RayCastOutput;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.BodyDef;
+import org.jbox2d.dynamics.BodyType;
 import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.FixtureDef;
 import org.jbox2d.dynamics.World;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.util.vector.Matrix3f;
+import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
 /*
@@ -26,19 +34,27 @@ public class LightShadower implements RayCastCallback {
     private World w;
     private Vec2 rcep;
 
+    private List<Fixture> fixs = new LinkedList<>();
+
     public LightShadower() {
         w = new World(new Vec2());
 
-        for (int i = 0; i < 10; i++) {
-            FixtureDef fd = new FixtureDef();
-            PolygonShape sd = new PolygonShape();
-            sd.setAsBox(0.025f, 0.025f);
-            fd.shape = sd;
+        FixtureDef fd = new FixtureDef();
+        PolygonShape sd = new PolygonShape();
+        sd.setAsBox(40, 13f);
+        fd.shape = sd;
 
-            BodyDef bd = new BodyDef();
-            bd.position = new Vec2(0.1f * i, 0.0f);
-            w.createBody(bd).createFixture(fd);
+        for (int i = 0; i < 6; i++) {
+            for (int j = 0; j < 8; j++) {
+
+                BodyDef bd = new BodyDef();
+                bd.position = new Vec2(-300 + i * 120, 200 - j * 40);
+
+                fixs.add(w.createBody(bd).createFixture(fd));
+                fixs.get(fixs.size() - 1).m_userData = i + "_" + j;
+            }
         }
+
     }
 
     public World getWorld() {
@@ -62,15 +78,20 @@ public class LightShadower implements RayCastCallback {
     }
 
     private Vec2 calcRay(Vec2 pos, Vec2 dir) {
-        rcep = null;
-        w.raycast(this, pos, pos.add(dir));
-        return rcep != null ? rcep.sub(pos) : dir;
+        of = 0;
+        w.raycast(this, pos.add(dir), pos);
+        //w.raycast(this, pos, pos.add(dir));
+        return dir.mul(1 - of);
     }
+
+    private float of;
 
     @Override
     public float reportFixture(Fixture fix, Vec2 point, Vec2 normal, float frac) {
-        rcep = point;
-        return frac;
+        if (of < frac) {
+            of = frac;
+        }
+        return 1;
     }
 
 }

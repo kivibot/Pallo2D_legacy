@@ -1,0 +1,9 @@
+{
+	"version": 3,
+	"type": "material",
+	"name": "brick",
+	"diffuse": "brick-diffuse",
+	"normal": "brick-normal",
+	"gloss": "brick-gloss",
+	"shader": "shader1",
+}

@@ -1,0 +1,9 @@
+{
+	"version": 3,
+	"type": "material",
+	"name": "ball",
+	"diffuse": "ball-diffuse",
+	"normal": "ball-normal",
+	"gloss": "ball-gloss",
+	"shader": "shader1",
+}

@@ -11,23 +11,21 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.lwjgl.BufferUtils;
-import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
-import org.lwjgl.openal.AL;
-import org.lwjgl.openal.AL10;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.WaveData;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
+
+
+import Demo01.PalloDemo01;
+
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -41,7 +39,8 @@ import org.lwjgl.util.vector.Vector3f;
 public class Main extends PalloApp {
 
     public static void main(String[] args) {
-        new Main().start();
+        new PalloDemo01().start();
+        //new Main().start();
     }
 
     private Spatial s;
@@ -98,19 +97,23 @@ public class Main extends PalloApp {
         }
 
         rootNode.addChild(new EpicParticles(10));
-        try {
-            AL.create();
-        } catch (LWJGLException ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-        }
 
         al = new AudioListener(true);
+
+        rootNode.addChild(al);
+
+        this.getAudioEngine().setActiveListener(al);
+
         try {
-            AudioSource as = new AudioSource(WaveData.create(new BufferedInputStream(new FileInputStream(new File("assets/test3.wav")))));
+            for (int i = 0; i < 1; i++) {
+                AudioSource as = new AudioSource(WaveData.create(new BufferedInputStream(new FileInputStream(new File("assets/test3.wav")))));
 
-            as.getTransform().setLocalPosition(new Vector2f(0, 0f));
+                as.getTransform().setLocalPosition(new Vector2f(i, 0f));
 
-            as.play();
+                as.play();
+
+                rootNode.addChild(as);
+            }
         } catch (FileNotFoundException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -121,7 +124,6 @@ public class Main extends PalloApp {
     protected void Update() {
 
         al.getTransform().setLocalPosition(new Vector2f((float) Math.cos(System.currentTimeMillis() / 1000.0) * 1.5f, (float) Math.sin(System.currentTimeMillis() / 1000.0) * 1.5f));
-        al.move();
 
         x = Mouse.getX() / 400f - 1f;
         y = Mouse.getY() / 300f - 1f;
@@ -208,7 +210,7 @@ public class Main extends PalloApp {
         }
         if (Keyboard.isKeyDown(Keyboard.KEY_H)) {
             try {
-                Thread.sleep(500);
+                Thread.sleep(50);
             } catch (InterruptedException ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
