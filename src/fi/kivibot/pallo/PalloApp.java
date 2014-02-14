@@ -101,8 +101,9 @@ public abstract class PalloApp {
         handleRendering();
         handleAudio();
         Display.update();
+        renderer.gc();
         Display.sync(frame_rate);
-        //   Display.sync(1);
+        //Display.sync(1);
         return running;
     }
 

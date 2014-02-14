@@ -25,6 +25,8 @@ import org.lwjgl.util.vector.Vector3f;
 
 import Demo01.PalloDemo01;
 import fi.kivibot.pallo.rendering.light.AmbientLight;
+import java.util.LinkedList;
+import java.util.List;
 
 
 /*

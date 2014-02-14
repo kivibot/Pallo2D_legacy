@@ -3,6 +3,7 @@ package Demo01;
 import fi.kivibot.misc.Node;
 import fi.kivibot.pallo.PalloApp;
 import fi.kivibot.pallo.assets.AssetManager;
+import fi.kivibot.pallo.rendering.ParticleEmitter;
 import fi.kivibot.pallo.rendering.Spatial;
 import fi.kivibot.pallo.rendering.light.AmbientLight;
 import fi.kivibot.pallo.rendering.light.DirectionalLight;
@@ -65,11 +66,13 @@ public class PalloDemo01 extends PalloApp {
                 rootNode.addChild(b);
             }
         }
-        for (int i = 0; i < 40; i++) {
+        for (int i = 0; i < 3; i++) {
             ln = new Ball();
             rootNode.addChild(ln);
         }
-        rootNode.addChild(new DirectionalLight(new Vector3f(0.3f, 0.3f, 0.3f), new Vector3f(-1, 1, -1)));
+        
+        rootNode.addChild(new DirectionalLight(new Vector3f(0.3f, 0.3f, 0.5f), new Vector3f(-2, 1, -1)));
+        //rootNode.addChild(new ParticleEmitter());
     }
 
 }

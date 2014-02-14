@@ -7,6 +7,7 @@ package fi.kivibot.pallo.rendering.light;
 
 import fi.kivibot.pallo.rendering.Mesh;
 import fi.kivibot.pallo.rendering.VertexBuffer;
+import fi.kivibot.util.TimeUtils;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import org.lwjgl.BufferUtils;
@@ -61,8 +62,19 @@ public class PointLight extends Light {
 
     @Deprecated
     public void genMesh() {
-        FloatBuffer fb = BufferUtils.createFloatBuffer(2 + this.rays * 2);
-        IntBuffer ib = BufferUtils.createIntBuffer(3 * rays);
+        FloatBuffer fb = null;
+        if (m != null && m.getVerticeBuffer() != null && m.getVerticeBuffer().getData().capacity() == 2 + this.rays * 2) {
+            fb = (FloatBuffer) m.getVerticeBuffer().getData().clear();
+        } else {
+            fb = BufferUtils.createFloatBuffer(2 + this.rays * 2);
+        }
+        IntBuffer ib = null;
+        if (m != null && m.getIndiceBuffer() != null && m.getIndiceBuffer().getData().capacity() == this.rays * 3) {
+            ib = (IntBuffer) m.getIndiceBuffer().getData().clear();
+        } else {
+            ib = BufferUtils.createIntBuffer(3 * rays);
+        }
+
         fb.put(new float[]{0, 0});
         float l = range;
         for (int i = 0; i < this.rays; i++) {
@@ -79,11 +91,21 @@ public class PointLight extends Light {
         }
         fb.flip();
         ib.flip();
-        VertexBuffer vb = new VertexBuffer(VertexBuffer.Type.Float, VertexBuffer.Usage.Dynamic);
-        VertexBuffer vib = new VertexBuffer(VertexBuffer.Type.Integer, VertexBuffer.Usage.Dynamic);
-        vb.setData(fb);
-        vib.setData(ib);
-        this.m = new Mesh(vb, vb, vib);
+        if (this.m == null) {
+            VertexBuffer vb = new VertexBuffer(VertexBuffer.Type.Float, VertexBuffer.Usage.Dynamic);
+            VertexBuffer vib = new VertexBuffer(VertexBuffer.Type.Integer, VertexBuffer.Usage.Dynamic);
+            vb.setData(fb);
+            vib.setData(ib);
+
+            this.m = new Mesh(vb, vb, vib);
+        } else {
+            VertexBuffer vb = m.getVerticeBuffer();
+            VertexBuffer vib = m.getIndiceBuffer();
+            m.getTexCoordsBuffer().setData(fb);
+            vb.setData(fb);
+            vib.setData(ib);
+        }
+
     }
 
 }

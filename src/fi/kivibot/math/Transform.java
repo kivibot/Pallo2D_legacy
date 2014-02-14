@@ -22,6 +22,9 @@ public class Transform {
     private Matrix3f mat = new Matrix3f();
 
     private Transform parent;
+    
+    //Memory allocation optimization
+    private Matrix3f ret = new Matrix3f();
 
     public Transform(Vector2f p) {
         pos = p;
@@ -66,7 +69,6 @@ public class Transform {
     }
 
     public Matrix3f getWorldMatrix() {
-        Matrix3f ret = new Matrix3f();
         if (this.parent != null) {
             Matrix3f.mul(this.parent.getWorldMatrix(), this.getLocalMatrix(), ret);
         } else {
@@ -96,6 +98,10 @@ public class Transform {
         sca.y = y;
 
         this.setRotation(this.rot);
+    }
+
+    public Vector2f getScale() {
+        return this.sca;
     }
 
 }

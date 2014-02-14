@@ -42,6 +42,7 @@ import org.lwjgl.opengl.GL30;
 public class AssetManager {
 
     private static final HashMap<String, JSONObject> materials = new HashMap<>();
+    private static final HashMap<String, Material> materials_ready = new HashMap<>();
     private static final HashMap<String, Shader> shaders = new HashMap<>();
     private static final HashMap<String, Texture> textures = new HashMap<>();
     private static final HashMap<String, Mesh> meshes = new HashMap<>();
@@ -175,6 +176,10 @@ public class AssetManager {
     }
 
     public static Material getMaterial(String key) {
+        Material m = materials_ready.get(key);
+        if (m != null) {
+            return m;
+        }
         JSONObject jso = materials.get(key);
         if (jso == null) {
             return Material.DEFAULT;
@@ -190,6 +195,7 @@ public class AssetManager {
         }
         Shader shader = getShader(jso.getString("shader"));
         Material mat = new Material(key, diffuse, normal, gloss, shader);
+        materials_ready.put(key, mat);
         return mat;
     }
 

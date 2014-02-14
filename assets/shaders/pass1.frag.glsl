@@ -1,7 +1,7 @@
 #version 140
 
 const int matsize = 3+1;
-const int matcount = 10;
+const int matcount = 20;
 
 const int lightsize = 3+3+3;
 
@@ -55,7 +55,7 @@ void main(void) {
 	
 		float d = length(ltm);
 	
-		float a = 1.0 / ((d*attenuationLinear + pow(d,2)*attenuationSquare));
+		float a = clamp(1.0 / ((d*attenuationLinear + pow(d,2)*attenuationSquare)),0.0,1.0);
 	
 		ltm /= d;
 		
