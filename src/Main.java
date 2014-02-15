@@ -136,12 +136,12 @@ public class Main extends PalloApp {
             for (int ib = 0; ib < 1; ib++) {
 
                 ic++;
-                FloatBuffer fb = BufferUtils.createFloatBuffer(8 + s.getMesh().getVerticeBuffer().getData().capacity());
-                FloatBuffer fb2 = (FloatBuffer) s.getMesh().getVerticeBuffer().getData();
+                FloatBuffer fb = BufferUtils.createFloatBuffer(8 + s.getMesh().getBuffer("position").getData().capacity());
+                FloatBuffer fb2 = (FloatBuffer) s.getMesh().getBuffer("position").getData();
                 fb.put(fb2);
                 fb.put(new float[]{x, y, x, y + .1f, x + .1f, y + .1f, x + .1f, y});
                 fb.flip();
-                s.getMesh().getVerticeBuffer().setData(fb);
+                s.getMesh().getBuffer("position").setData(fb);
 
                 IntBuffer fb3 = BufferUtils.createIntBuffer(ic * 6);
                 FloatBuffer fb4 = BufferUtils.createFloatBuffer(ic * 8);
@@ -152,15 +152,15 @@ public class Main extends PalloApp {
                 }
                 fb3.flip();
                 fb4.flip();
-                s.getMesh().getIndiceBuffer().setData(fb3);
-                s.getMesh().getTexCoordsBuffer().setData(fb4);
+                s.getMesh().getBuffer("index").setData(fb3);
+                s.getMesh().getBuffer("texcoord").setData(fb4);
 
             }
         }
         if (Keyboard.isKeyDown(Keyboard.KEY_B)) {
 
             ic = 0;
-            Mesh me = new Mesh(new float[]{x, y, x, y + 0.05f, x + 0.05f, y + 0.05f, x + 0.05f, y}, new int[]{0, 1, 2, 0, 2, 3}, new float[]{0, 1, 0, 0, 1, 0, 1, 1});
+            Mesh me = new Mesh();//new float[]{x, y, x, y + 0.05f, x + 0.05f, y + 0.05f, x + 0.05f, y}, new int[]{0, 1, 2, 0, 2, 3}, new float[]{0, 1, 0, 0, 1, 0, 1, 1});
 
             s = new Spatial(me, s.getMaterial());
             rootNode.addChild(s);

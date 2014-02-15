@@ -21,10 +21,12 @@ import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Queue;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.input.Keyboard;
@@ -54,7 +56,6 @@ public class Renderer {
     private int objc;
     private Spatial screen, screen2;
     private Shader pass1_point_shader, pass1_directional_shader, pass1_ambient_shader, pass2_shader;
-    private VertexBuffer lightbuf = new VertexBuffer(Type.Float, Usage.Dynamic, Target.Uniform);
 
     private FBO pass0_fbo;
 
@@ -78,8 +79,23 @@ public class Renderer {
         pass0_trgs.flip();
         pass0_fbo.getTargetBuffer().setData(pass0_trgs);
 
-        Mesh m = new Mesh(new float[]{-1, -1, -1, 1, 1, 1, 1, -1}, new int[]{0, 1, 2, 0, 2, 3}, new float[]{0, 0, 0, 1, 1, 1, 1, 0});
-        Mesh m2 = new Mesh(new float[]{-1, -1, -1, 1, 1, 1, 1, -1}, new int[]{0, 1, 2, 0, 2, 3}, new float[]{0, 1, 0, 0, 1, 0, 1, 1});
+        FloatBuffer fb0 = BufferUtils.createFloatBuffer(8);
+        fb0.put(new float[]{-1, -1, -1, 1, 1, 1, 1, -1});
+        fb0.flip();
+        VertexBuffer vb0 = new VertexBuffer(VertexBuffer.Type.Float, VertexBuffer.Usage.Dynamic);
+        vb0.setData(fb0);
+        FloatBuffer fb1 = BufferUtils.createFloatBuffer(8);
+        fb1.put(new float[]{0, 0, 0, 1, 1, 1, 1, 0});
+        fb1.flip();
+        VertexBuffer vb1 = new VertexBuffer(VertexBuffer.Type.Float, VertexBuffer.Usage.Dynamic);
+        vb1.setData(fb0);
+        IntBuffer ib0 = BufferUtils.createIntBuffer(6);
+        ib0.put(new int[]{0, 1, 2, 0, 2, 3});
+        ib0.flip();
+        VertexBuffer vb2 = new VertexBuffer(VertexBuffer.Type.Integer, VertexBuffer.Usage.Dynamic);
+        vb2.setData(ib0);
+        Mesh m = new Mesh().addBuffer("position", vb0).addBuffer("texcoord", vb1).addBuffer("index", vb2);
+        Mesh m2 = m.clone();//= new Mesh(new float[]{-1, -1, -1, 1, 1, 1, 1, -1}, new int[]{0, 1, 2, 0, 2, 3}, new float[]{0, 1, 0, 0, 1, 0, 1, 1});
 
         Material ma = new Material("renderer_screen", Texture.DEFAULT, AssetManager.getShader("shader0"));
         Material ma2 = new Material("renderer_screen", Texture.DEFAULT, AssetManager.getShader("light_preview"));
@@ -131,8 +147,8 @@ public class Renderer {
 
         GL11.glDisable(GL11.GL_BLEND);
 
-        this.updateMesh(screen.getMesh());
-        this.updateMesh(screen2.getMesh());
+        this.updateMesh(screen.getMesh(), new String[]{"position", "texcoord"});
+        this.updateMesh(screen2.getMesh(), new String[]{"position", "texcoord"});
 
         this.updateFBO(pass0_fbo);
 
@@ -155,13 +171,13 @@ public class Renderer {
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
         if (Keyboard.isKeyDown(Keyboard.KEY_NUMPAD0)) {
             screen.getMaterial().setDiffuseMap(pass0_fbo.getTextureList().get(0));
-            this.renderSpatial_old(screen);
+            throw new java.lang.UnsupportedOperationException();
         } else if (Keyboard.isKeyDown(Keyboard.KEY_NUMPAD1)) {
             screen.getMaterial().setDiffuseMap(pass0_fbo.getTextureList().get(1));
-            this.renderSpatial_old(screen);
+            throw new java.lang.UnsupportedOperationException();
         } else if (Keyboard.isKeyDown(Keyboard.KEY_NUMPAD2)) {
             screen.getMaterial().setDiffuseMap(pass0_fbo.getTextureList().get(2));
-            this.renderSpatial_old(screen);
+            throw new java.lang.UnsupportedOperationException();
         } else {
 
             GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
@@ -244,7 +260,7 @@ public class Renderer {
             return;
         }
 
-        this.updateMesh(l.getMesh());
+        this.updateMesh(l.getMesh(), new String[]{"position"});
 
         switch (l.getType()) {
             case POINT:
@@ -275,8 +291,12 @@ public class Renderer {
             case DIRECTIONAL:
                 ld = (FloatBuffer) this.matbufs[0].clear();
                 col = l.getColor();
-                Vector3f dir = ((DirectionalLight) l).getDirection();
-                ld.put(new float[]{col.x, col.y, col.z, dir.x, dir.y, dir.z, col.x, col.y, col.z});
+                Vector3f dir = ((DirectionalLight) l).getDirection(),
+                 a = new Vector3f(),
+                 b = new Vector3f(dir.x, dir.y, 0);
+                Matrix3f.transform(l.getTransform().getWorldMatrix(), b, a);
+                a.z = dir.z;
+                ld.put(new float[]{col.x, col.y, col.z, a.x, a.y, a.z, col.x, col.y, col.z});
                 ld.flip();
                 GL20.glUniform1(GL20.glGetUniformLocation(s.getID(), "li"), ld);
                 break;
@@ -296,8 +316,8 @@ public class Renderer {
 
         //RENDERING
         GL30.glBindVertexArray(l.getMesh().getID());
-        GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, l.getMesh().getIndiceBuffer().getID());
-        GL11.glDrawElements(GL11.GL_TRIANGLES, l.getMesh().getIndiceBuffer().getData().capacity(), GL11.GL_UNSIGNED_INT, 0);
+        GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, l.getMesh().getBuffer("index").getID());
+        GL11.glDrawElements(GL11.GL_TRIANGLES, l.getMesh().getBuffer("index").getData().capacity(), GL11.GL_UNSIGNED_INT, 0);
 
     }
 
@@ -339,7 +359,7 @@ public class Renderer {
             id = matList.size() - 1;
         }
 
-        this.updateMesh(mesh);
+        this.updateMesh(mesh, new String[]{"position", "texcoord"});
 
         GL20.glUniform1i(GL20.glGetUniformLocation(pass0.getID(), "matID"), id);
 
@@ -385,38 +405,12 @@ public class Renderer {
 
         //RENDERING
         GL30.glBindVertexArray(s.getMesh().getID());
-        GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, s.getMesh().getIndiceBuffer().getID());
-        GL11.glDrawElements(GL11.GL_TRIANGLES, s.getMesh().getIndiceBuffer().getData().capacity(), GL11.GL_UNSIGNED_INT, 0);
+        GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, s.getMesh().getBuffer("index").getID());
+        GL11.glDrawElements(GL11.GL_TRIANGLES, s.getMesh().getBuffer("index").getData().capacity(), GL11.GL_UNSIGNED_INT, 0);
 
     }
 
-    @Deprecated
-    private void renderSpatial_old(Spatial s) {
-        objc++;
-
-        Material mat = s.getMaterial();
-
-        this.updateMesh(s.getMesh());
-
-        GL13.glActiveTexture(GL13.GL_TEXTURE0);
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, mat.getDiffuseMap().getID());
-        GL20.glUseProgram(mat.getShader().getID());
-
-        // Bind to the VAO that has all the information about the vertices
-        GL30.glBindVertexArray(s.getMesh().getID());
-        // Bind to the index VBO that has all the information about the order of the vertices
-        GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, s.getMesh().getIndiceBuffer().getID());
-
-        // Draw the vertices
-        GL11.glDrawElements(GL11.GL_TRIANGLES, s.getMesh().getIndiceBuffer().getData().capacity(), GL11.GL_UNSIGNED_INT, 0);
-
-        // Put everything back to default (deselect)
-        GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, 0);
-
-        //GL30.glBindVertexArray(0);
-    }
-
-    private void updateMesh(Mesh m) {
+    private void updateMesh(Mesh m, String[] vapos) {
         boolean created = false;
         if (m.getID() == -1) {
             m.setID(GL30.glGenVertexArrays());
@@ -430,24 +424,21 @@ public class Renderer {
         GL30.glBindVertexArray(m.getID());
 
         if (created) {
-            GL20.glEnableVertexAttribArray(0);
-            GL20.glEnableVertexAttribArray(1);
+            for (int i = 0; i < vapos.length; i++) {
+                GL20.glEnableVertexAttribArray(i);
+            }
         }
-
-        boolean a = updateVertexBuffer(m.getVerticeBuffer());
-        if (created || a) {
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, m.getVerticeBuffer().getID());
-            GL20.glVertexAttribPointer(0, 2, GL11.GL_FLOAT, true, 0, 0);
+        List<String> vap = Arrays.asList(vapos);
+        for (Entry<String, VertexBuffer> e : m.getBuffers()) {
+            VertexBuffer vb = e.getValue();
+            boolean a = this.updateVertexBuffer(vb);
+            int index = vap.indexOf(e.getKey());
+            if (index != -1 && (a || created)) {
+                GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vb.getID());
+                //argumentit
+                GL20.glVertexAttribPointer(index, 2, GL11.GL_FLOAT, true, 0, 0);
+            }
         }
-
-        a = updateVertexBuffer(m.getTexCoordsBuffer());
-
-        if (created || a) {
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, m.getTexCoordsBuffer().getID());
-            GL20.glVertexAttribPointer(1, 2, GL11.GL_FLOAT, false, 0, 0);
-        }
-
-        updateVertexBuffer(m.getIndiceBuffer());
 
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
     }
@@ -502,8 +493,6 @@ public class Renderer {
                 return GL15.GL_ARRAY_BUFFER;
             case Index:
                 return GL15.GL_ELEMENT_ARRAY_BUFFER;
-            case Uniform:
-                return GL31.GL_UNIFORM_BUFFER;
         }
         return 0;
     }

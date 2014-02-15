@@ -41,7 +41,7 @@ public class DirectionalLight extends Light {
         VertexBuffer vib = new VertexBuffer(VertexBuffer.Type.Integer, VertexBuffer.Usage.Dynamic);
         vb.setData(fb);
         vib.setData(ib);
-        this.m = new Mesh(vb, vb, vib);
+        this.m = new Mesh().addBuffer("position", vb).addBuffer("index", vib);
     }
 
     public Vector3f getDirection() {

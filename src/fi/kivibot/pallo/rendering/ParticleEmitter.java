@@ -52,7 +52,7 @@ public class ParticleEmitter extends GameObject {
     private Queue<Particle> buffer = new LinkedList<>();
 
     public ParticleEmitter() {
-        this(300, 700, 300, 3, 15, new Vector2f(0, 7), (float) Math.PI / 2, (float) -Math.PI / 3 * 2, 0, 1.0f, new Vector3f(1f, 0.5f, 0.1f), new Vector3f(0.2f, -0.0f, 0f));
+        this(300, 700, 300, 10, 15, new Vector2f(0, 7), (float) Math.PI / 2, (float) -Math.PI / 3 * 2, -1.0f, 1.5f, new Vector3f(1f, 0.5f, 0.1f), new Vector3f(0.3f, -0.0f, 0f));
     }
 
     public ParticleEmitter(int mc, int ma, float es, float ss, float se, Vector2f g, float a, float f, float mis, float mas, Vector3f cs, Vector3f ce) {

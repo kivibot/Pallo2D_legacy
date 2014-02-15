@@ -63,14 +63,14 @@ public class PointLight extends Light {
     @Deprecated
     public void genMesh() {
         FloatBuffer fb = null;
-        if (m != null && m.getVerticeBuffer() != null && m.getVerticeBuffer().getData().capacity() == 2 + this.rays * 2) {
-            fb = (FloatBuffer) m.getVerticeBuffer().getData().clear();
+        if (m != null && m.getBuffer("position") != null && m.getBuffer("position").getData().capacity() == 2 + this.rays * 2) {
+            fb = (FloatBuffer) m.getBuffer("position").getData().clear();
         } else {
             fb = BufferUtils.createFloatBuffer(2 + this.rays * 2);
         }
         IntBuffer ib = null;
-        if (m != null && m.getIndiceBuffer() != null && m.getIndiceBuffer().getData().capacity() == this.rays * 3) {
-            ib = (IntBuffer) m.getIndiceBuffer().getData().clear();
+        if (m != null && m.getBuffer("index") != null && m.getBuffer("index").getData().capacity() == this.rays * 3) {
+            ib = (IntBuffer) m.getBuffer("index").getData().clear();
         } else {
             ib = BufferUtils.createIntBuffer(3 * rays);
         }
@@ -97,11 +97,10 @@ public class PointLight extends Light {
             vb.setData(fb);
             vib.setData(ib);
 
-            this.m = new Mesh(vb, vb, vib);
+            this.m = new Mesh().addBuffer("position", vb).addBuffer("index", vib);
         } else {
-            VertexBuffer vb = m.getVerticeBuffer();
-            VertexBuffer vib = m.getIndiceBuffer();
-            m.getTexCoordsBuffer().setData(fb);
+            VertexBuffer vb = m.getBuffer("position");
+            VertexBuffer vib = m.getBuffer("index");
             vb.setData(fb);
             vib.setData(ib);
         }

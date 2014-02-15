@@ -17,7 +17,7 @@ public class VertexBuffer extends GLObject implements Cloneable {
 
     public static enum Target {
 
-        Vertex, Index, Uniform
+        Vertex, Index
     }
 
     public static enum Usage {

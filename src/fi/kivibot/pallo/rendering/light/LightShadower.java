@@ -79,7 +79,7 @@ public class LightShadower implements RayCastCallback {
             fb.put(new float[]{ret.x, ret.y});
         }
         fb.flip();
-        l.getMesh().getVerticeBuffer().setData(fb);
+        l.getMesh().getBuffer("position").setData(fb);
     }
 
     private Vec2 calcRay(Vec2 pos, Vec2 dir) {

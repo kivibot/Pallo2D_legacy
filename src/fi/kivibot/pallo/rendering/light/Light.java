@@ -19,7 +19,8 @@ public abstract class Light extends Node {
 
         DIRECTIONAL,
         POINT,
-        AMBIENT
+        AMBIENT,
+        ARRAY
     }
 
     private Vector3f color;

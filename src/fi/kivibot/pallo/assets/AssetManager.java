@@ -365,7 +365,7 @@ public class AssetManager {
         v.setData(ver);
         t.setData(tec);
         i.setData(ind);
-        Mesh m = new Mesh(v, t, i);
+        Mesh m = new Mesh().addBuffer("position", v).addBuffer("texcoord", t).addBuffer("index", i);
         meshes.put(name, m);
     }
 

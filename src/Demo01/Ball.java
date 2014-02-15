@@ -17,10 +17,10 @@ public class Ball extends GameObject {
 
     private Spatial gfx;
     private PointLight li;
-    
+
     private ParticleEmitter fire, fire2;
 
-    private Vector2f velo = new Vector2f((float) Math.random() * 10, (float) Math.random() * 10);
+    private Vector2f velo = new Vector2f((float) Math.random() * 20 - 10, (float) Math.random() * 20 - 10);
 
     @Override
     public boolean Init() {
@@ -38,37 +38,39 @@ public class Ball extends GameObject {
         this.addChild(fire);
         fire2 = new ParticleEmitter();
         this.addChild(fire2);
-        fire2.setMaximumAmount(20);
-        fire2.setEmittingSpeed(20);
-        fire2.setStartSize(10);
+        fire2.setMaximumAmount(10);
+        fire2.setEmittingSpeed(10);
+        fire2.setStartSize(0);
         fire2.setEndSize(400);
-        fire2.setStartColor(new Vector3f(0.2f,0.1f,0f));
-        fire2.setEndColor(new Vector3f(0.1f,0f,0f));
+        fire2.setStartColor(new Vector3f(0.2f, 0.1f, 0f));
+        fire2.setEndColor(new Vector3f(0.1f, 0f, 0f));
         return true;
     }
 
     @Override
     public boolean Update() {
-        velo.x += (float) (Math.random() - 0.5) * Math.random() * 0.1;
-        velo.y += (float) (Math.random() - 0.5) * Math.random() * 0.1;
         this.getTransform().translate(velo);
 
         fire.setEmittingPoint((Vector2f) this.getTransform().getWorldPosition());
         fire.getTransform().setLocalPosition((Vector2f) this.getTransform().getWorldPosition().negate());
         fire2.setEmittingPoint((Vector2f) this.getTransform().getWorldPosition());
         fire2.getTransform().setLocalPosition((Vector2f) this.getTransform().getWorldPosition().negate());
-        
+
         if (this.getTransform().getLocalPosition().x < -400) {
             velo.x = Math.abs(velo.x);
+            this.getTransform().translate(new Vector2f(-400 - this.getTransform().getLocalPosition().x, 0));
         }
         if (this.getTransform().getLocalPosition().y < -300) {
             velo.y = Math.abs(velo.y);
+            this.getTransform().translate(new Vector2f(0, -300 - this.getTransform().getLocalPosition().y));
         }
         if (this.getTransform().getLocalPosition().x > 400) {
             velo.x = -Math.abs(velo.x);
+            this.getTransform().translate(new Vector2f(400 - this.getTransform().getLocalPosition().x, 0));
         }
         if (this.getTransform().getLocalPosition().y > 300) {
             velo.y = -Math.abs(velo.y);
+            this.getTransform().translate(new Vector2f(0, 300 - this.getTransform().getLocalPosition().y));
         }
         return true;
     }
