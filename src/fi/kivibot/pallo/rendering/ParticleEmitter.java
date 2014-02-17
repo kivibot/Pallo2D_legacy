@@ -6,7 +6,9 @@
 package fi.kivibot.pallo.rendering;
 
 import fi.kivibot.engine.game.GameObject;
+import fi.kivibot.misc.Node;
 import fi.kivibot.pallo.rendering.light.PointLight;
+import fi.kivibot.pallo.rendering.light.PointLightArray;
 import fi.kivibot.util.TimeUtils;
 import java.util.LinkedList;
 import java.util.List;
@@ -20,14 +22,12 @@ import org.lwjgl.util.vector.Vector3f;
  */
 public class ParticleEmitter extends GameObject {
 
-    private class Particle {
+    private class Particle extends Node {
 
-        public PointLight pl;
         public int age;
         public Vector2f velo;
 
-        public Particle(PointLight a, Vector2f v) {
-            pl = a;
+        public Particle(Vector2f v) {
             velo = v;
         }
     }
@@ -47,12 +47,14 @@ public class ParticleEmitter extends GameObject {
     private float height = 30;
 
     private Vector2f ep = new Vector2f();
-    
+
     private List<Particle> particles = new LinkedList<>();
     private Queue<Particle> buffer = new LinkedList<>();
 
+    private PointLightArray pla = new PointLightArray();
+
     public ParticleEmitter() {
-        this(300, 700, 300, 10, 15, new Vector2f(0, 7), (float) Math.PI / 2, (float) -Math.PI / 3 * 2, -1.0f, 1.5f, new Vector3f(1f, 0.5f, 0.1f), new Vector3f(0.3f, -0.0f, 0f));
+        this(300, 700, 300, 10, 5, new Vector2f(0, 7), (float) Math.PI / 2, (float) -Math.PI / 3 * 2, -1.0f, 1.5f, new Vector3f(1f, 0.5f, 0.1f), new Vector3f(0.3f, -0.0f, 0f));
     }
 
     public ParticleEmitter(int mc, int ma, float es, float ss, float se, Vector2f g, float a, float f, float mis, float mas, Vector3f cs, Vector3f ce) {
@@ -166,31 +168,28 @@ public class ParticleEmitter extends GameObject {
         return this.color_e;
     }
 
-    public void setEmittingPoint(Vector2f v){
+    public void setEmittingPoint(Vector2f v) {
         this.ep = v;
     }
-    
-    public Vector2f getEmittingPoint(){
+
+    public Vector2f getEmittingPoint() {
         return this.ep;
     }
-    
+
     private long last_time;
     private float toadd;
 
     @Override
     public boolean Init() {
         last_time = TimeUtils.getTime();
+        this.addChild(pla);
         return true;
     }
 
     @Override
     public boolean Update() {
         for (int i = 0; i < this.max_count - (buffer.size() + particles.size()); i++) {
-            Particle p = new Particle(new PointLight(this.color_s), new Vector2f());
-            p.pl.setCS(false);
-            p.pl.setRC(129);
-            p.pl.setRange(1);
-            p.pl.genMesh();
+            Particle p = new Particle(new Vector2f());
             buffer.add(p);
         }
 
@@ -199,38 +198,34 @@ public class ParticleEmitter extends GameObject {
         float step = passed / 1000f;
         this.last_time = cur_time;
         List<Particle> tbr = new LinkedList<>();
+        int ind = -1;
         for (Particle p : particles) {
+            ind++;
             p.age += passed;
             if (p.age > this.max_age) {
                 tbr.add(p);
             } else {
-                p.pl.getTransform().translate(p.velo);
+                p.getTransform().translate(p.velo);
+
+                Vector2f asdf = p.getTransform().getLocalPosition();
+
+                pla.setPosition(ind, new Vector3f(asdf.x, asdf.y, this.height));
+
                 float r = p.age / (float) this.max_age * (this.size_e - this.size_s) + this.size_s;
-                
-                
-                if(r > 50){
-                    p.pl.setCS(true);
-                    p.pl.setRange(r);
-                    p.pl.getTransform().setScale(1, 1);
-                }else{
-                    if(p.pl.getRange() != 1){
-                        p.pl.setRange(1);
-                        p.pl.genMesh();
-                    }
-                    p.pl.getTransform().setScale(r, r);
-                }
-                
+
+                pla.setRadius(ind, r);
+
                 float cr = (this.color_e.x * (float) p.age + this.color_s.x * (float) (this.max_age - p.age)) / (float) this.max_age;
                 float cg = (this.color_e.y * (float) p.age + this.color_s.y * (float) (this.max_age - p.age)) / (float) this.max_age;
                 float cb = (this.color_e.z * (float) p.age + this.color_s.z * (float) (this.max_age - p.age)) / (float) this.max_age;
-                p.pl.setColor(new Vector3f(cr, cg, cb));
+                pla.setColor(ind, new Vector3f(cr, cg, cb));
                 p.velo.x += gravity.x * step;
                 p.velo.y += gravity.y * step;
 
             }
         }
         for (Particle p : tbr) {
-            this.removeChild(p.pl);
+            pla.removeFirst();
             particles.remove(p);
             buffer.add(p);
         }
@@ -241,16 +236,14 @@ public class ParticleEmitter extends GameObject {
             for (int i = 0; i < Math.floor(toadd) && !buffer.isEmpty(); i++) {
                 toadd--;
                 Particle p = buffer.poll();
-                p.pl.getTransform().setScale(1, 1);
-                p.pl.genMesh();
-                p.pl.setHeight(this.height);
-                p.pl.getTransform().setLocalPosition(ep);
                 p.age = 0;
+                p.getTransform().setLocalPosition(new Vector2f(ep.x, ep.y));
                 float vel = (float) ((this.max_speed - this.min_speed) * Math.random() + this.min_speed);
                 float a = this.angle + (float) (Math.random() - 0.5) * this.fos;
                 p.velo.x = (float) (Math.cos(a) * vel);
                 p.velo.y = (float) (Math.sin(a) * vel);
-                this.addChild(p.pl);
+
+                pla.addLight(color_s, new Vector3f(ep.x, ep.y, this.height), this.size_s);
                 particles.add(p);
             }
         }

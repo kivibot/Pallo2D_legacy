@@ -1,0 +1,17 @@
+{
+	"version": 4,
+	"type": "shader",
+	"name": "pass1_array",
+	"vertex": "pass1.vert",
+	"fragment": "pass1.frag",
+	"varloc": [
+		{ "name":"in_Position", "id":0, "type":"vert" },
+		{ "name":"in_Color", "id":1, "type":"vert" },
+		{ "name":"in_lpos", "id":2, "type":"vert" },
+		{ "name":"out_Color", "id":0, "type":"frag" },
+		{ "name":"out_Spec", "id":1, "type":"frag"}
+	],
+	"defines": [
+		"ARRAY"
+	]
+}

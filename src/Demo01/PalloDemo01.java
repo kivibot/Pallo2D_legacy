@@ -7,6 +7,7 @@ import fi.kivibot.pallo.rendering.ParticleEmitter;
 import fi.kivibot.pallo.rendering.Spatial;
 import fi.kivibot.pallo.rendering.light.AmbientLight;
 import fi.kivibot.pallo.rendering.light.DirectionalLight;
+import fi.kivibot.pallo.rendering.light.PointLightArray;
 import fi.kivibot.util.TimeUtils;
 import java.io.File;
 import java.util.List;
@@ -50,7 +51,7 @@ public class PalloDemo01 extends PalloApp {
         switch (state) {
             case GAME:
                 float f = TimeUtils.getTime() / 20000f * (float) Math.PI * 2;
-                
+
                 break;
         }
         float x = Mouse.getX() - 400f;
@@ -69,7 +70,7 @@ public class PalloDemo01 extends PalloApp {
                 rootNode.addChild(b);
             }
         }
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 10; i++) {
             ln = new Ball();
             rootNode.addChild(ln);
         }
@@ -78,6 +79,7 @@ public class PalloDemo01 extends PalloApp {
 
         rootNode.addChild(ln);
         //rootNode.addChild(new ParticleEmitter());
+
     }
 
 }

@@ -4,18 +4,15 @@
  * and open the template in the editor.
  */
 package fi.kivibot.pallo.rendering;
-
-import fi.kivibot.pallo.rendering.light.Light;
-import fi.kivibot.pallo.rendering.light.LightShadower;
 import fi.kivibot.math.Rect;
 import fi.kivibot.misc.Node;
 import fi.kivibot.pallo.assets.AssetManager;
-import fi.kivibot.pallo.rendering.VertexBuffer.Target;
-import fi.kivibot.pallo.rendering.VertexBuffer.Type;
 import fi.kivibot.pallo.rendering.VertexBuffer.Usage;
 import fi.kivibot.pallo.rendering.light.DirectionalLight;
+import fi.kivibot.pallo.rendering.light.Light;
+import fi.kivibot.pallo.rendering.light.LightShadower;
 import fi.kivibot.pallo.rendering.light.PointLight;
-import fi.kivibot.util.TimeUtils;
+import fi.kivibot.pallo.rendering.light.PointLightArray;
 import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -35,7 +32,6 @@ import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
-import org.lwjgl.opengl.GL31;
 import org.lwjgl.util.vector.Matrix3f;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
@@ -55,7 +51,7 @@ public class Renderer {
     private Rect screenBounds = new Rect(-10.75f, -10.75f, 111.5f, 111.5f);
     private int objc;
     private Spatial screen, screen2;
-    private Shader pass1_point_shader, pass1_directional_shader, pass1_ambient_shader, pass2_shader;
+    private Shader pass1_point_shader, pass1_directional_shader, pass1_ambient_shader, pass1_array_shader, pass2_shader;
 
     private FBO pass0_fbo;
 
@@ -106,6 +102,7 @@ public class Renderer {
         pass1_point_shader = AssetManager.getShader("pass1_point");
         pass1_directional_shader = AssetManager.getShader("pass1_directional");
         pass1_ambient_shader = AssetManager.getShader("pass1_ambient");
+        pass1_array_shader = AssetManager.getShader("pass1_array");
 
         pass2_shader = AssetManager.getShader("pass2");
 
@@ -249,6 +246,9 @@ public class Renderer {
             case AMBIENT:
                 s = this.pass1_ambient_shader;
                 break;
+            case ARRAY:
+                s = this.pass1_array_shader;
+                break;
             default:
                 System.out.println("No such type");
                 return;
@@ -260,7 +260,7 @@ public class Renderer {
             return;
         }
 
-        this.updateMesh(l.getMesh(), new String[]{"position"});
+        this.updateMesh(l.getMesh(), new String[]{"position", "color", "lpos"});
 
         switch (l.getType()) {
             case POINT:
@@ -306,6 +306,23 @@ public class Renderer {
                 ld.put(new float[]{col.x, col.y, col.z, 0, 0, 0, 0, 0, 0});
                 ld.flip();
                 GL20.glUniform1(GL20.glGetUniformLocation(s.getID(), "li"), ld);
+                break;
+            case ARRAY:
+                ((PointLightArray) l).update();
+                mat0b = (FloatBuffer) this.matbufs[0].clear();
+                ma0 = l.getTransform().getWorldMatrix();
+                sc = l.getTransform().getScale();
+                ma0.m10 = 0;
+                ma0.m01 = 0;
+                ma0.m00 = sc.x; //cos 0
+                ma0.m11 = sc.y; //cos 0
+                ma0.store(mat0b);
+                mat0b.flip();
+                matcb = (FloatBuffer) this.matbufs[1].clear();
+                this.main_cam.getTransform().getWorldMatrix().store(matcb);
+                matcb.flip();
+                GL20.glUniformMatrix3(GL20.glGetUniformLocation(s.getID(), "mat0"), false, mat0b);
+                GL20.glUniformMatrix3(GL20.glGetUniformLocation(s.getID(), "matc"), false, matcb);
                 break;
         }
 
@@ -436,7 +453,7 @@ public class Renderer {
             if (index != -1 && (a || created)) {
                 GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vb.getID());
                 //argumentit
-                GL20.glVertexAttribPointer(index, 2, GL11.GL_FLOAT, true, 0, 0);
+                GL20.glVertexAttribPointer(index, vb.getVertexSize(), GL11.GL_FLOAT, true, 0, 0);
             }
         }
 

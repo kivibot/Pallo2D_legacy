@@ -16,6 +16,11 @@ uniform float li[lightsize];
 	uniform float attenuationLinear;
 #endif
 
+#ifdef ARRAY
+	in vec3 pass_Color;
+	in vec3 pass_lpos;
+#endif
+
 out vec3 out_Color;
 out vec3 out_Spec;
 
@@ -39,8 +44,14 @@ void main(void) {
 	
 	const int off = 0;
 	
-	vec3 lcol = vec3(li[off+0],li[off+1],li[off+2]);
-	
+	#ifdef ARRAY
+		vec3 lcol = pass_Color;
+		vec3 lpos = pass_lpos;
+		vec3 lspe = lcol;
+	#else
+		vec3 lcol = vec3(li[off+0],li[off+1],li[off+2]);
+	#endif
+
 	#ifdef POINT
 		vec3 lpos = vec3(li[off+3],li[off+4],li[off+5]);
 		vec3 lspe = vec3(li[off+6],li[off+7],li[off+8]);
@@ -71,5 +82,19 @@ void main(void) {
 	#endif
 	#ifdef AMBIENT
 		out_Color = lcol * dif;
+	#endif
+	#ifdef ARRAY
+		vec3 ltm = lpos-mp;
+	
+		float d = length(ltm);
+	
+		float a = clamp(1.0 / ((d*0 + pow(d,2)*0.0001)),0.0,1.0);
+	
+		ltm /= d;
+		
+		vec3 hv = normalize(ltm+cp-mp);
+
+		out_Color = a * (max(0,dot(mn,ltm))* lcol * dif + lspe * mat_0 * pow(max(0.0, dot(hv,mn)), mat_shi) * 1.0);//dif.w);
+		//out_Color = lpos;
 	#endif
 }

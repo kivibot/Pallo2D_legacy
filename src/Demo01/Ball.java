@@ -6,6 +6,9 @@ import fi.kivibot.pallo.rendering.ParticleEmitter;
 import fi.kivibot.pallo.rendering.light.Light;
 import fi.kivibot.pallo.rendering.Spatial;
 import fi.kivibot.pallo.rendering.light.PointLight;
+import org.jbox2d.common.Vec2;
+import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
@@ -20,7 +23,7 @@ public class Ball extends GameObject {
 
     private ParticleEmitter fire, fire2;
 
-    private Vector2f velo = new Vector2f((float) Math.random() * 20 - 10, (float) Math.random() * 20 - 10);
+    private Vector2f velo = new Vector2f((float) Math.random() * 10 - 5, (float) Math.random() * 10 - 5);
 
     @Override
     public boolean Init() {
@@ -49,6 +52,19 @@ public class Ball extends GameObject {
 
     @Override
     public boolean Update() {
+
+        velo.x *= 0.998;
+        velo.y *= 0.998;
+        
+        if (Keyboard.isKeyDown(Keyboard.KEY_K)) {
+            Vector2f v = new Vector2f();
+            v.x -= (getTransform().getLocalPosition().x - (Mouse.getX() - 400.0f));
+            v.y -= (getTransform().getLocalPosition().y - (Mouse.getY() - 300.0f));
+            double f = 1.0 / ( 2 * Math.sqrt(v.x * v.x + v.y * v.y));
+
+            velo.x += v.x * f;
+            velo.y += v.y * f;
+        }
         this.getTransform().translate(velo);
 
         fire.setEmittingPoint((Vector2f) this.getTransform().getWorldPosition());

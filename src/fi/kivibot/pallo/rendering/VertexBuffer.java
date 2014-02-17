@@ -36,6 +36,7 @@ public class VertexBuffer extends GLObject implements Cloneable {
     private Usage usage;
     private Type type;
     private Target target;
+    private int vertsiz = 2;
 
     public VertexBuffer(Type t, Usage u) {
         this(t, u, Target.Vertex);
@@ -126,6 +127,14 @@ public class VertexBuffer extends GLObject implements Cloneable {
                 break;
         }
         return "VBO{ id: " + this.getID() + ", type: " + typ + ", data: [" + dat + "] }";
+    }
+
+    public int getVertexSize() {
+        return this.vertsiz;
+    }
+
+    public void setVertexSize(int s) {
+        this.vertsiz = s;
     }
 
 }

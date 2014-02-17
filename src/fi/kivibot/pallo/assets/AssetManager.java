@@ -158,6 +158,8 @@ public class AssetManager {
                                 case "frag":
                                     GL30.glBindFragDataLocation(sid, id, name);
                                     break;
+                                case "vert":
+                                    GL20.glBindAttribLocation(sid, id, name);
                             }
                         }
                     }
