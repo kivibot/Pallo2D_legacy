@@ -38,11 +38,13 @@ import java.util.List;
  *
  * @author kivi
  */
-public class Main extends PalloApp {
+public class App extends PalloApp {
 
     public static void main(String[] args) {
+        System.out.println(System.getProperty("java.library.path").replace(";", "\n"));
+
         new PalloDemo01().start();
-        //new Main().start();
+        //new App().start();
     }
 
     private Spatial s;
@@ -57,7 +59,7 @@ public class Main extends PalloApp {
 
     @Override
     protected void Init() {
-        AssetManager.addDir(new File("assets/"));
+        AssetManager.addDir(new File("resources/assets/"));
         Material ma = AssetManager.getMaterial("apina");
         ma.setSpecularColor(new Vector3f(1, 1, 1));
 
@@ -117,7 +119,7 @@ public class Main extends PalloApp {
                 rootNode.addChild(as);
             }
         } catch (FileNotFoundException ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         rootNode.addChild(new AmbientLight(new Vector3f()));
@@ -168,7 +170,7 @@ public class Main extends PalloApp {
             try {
                 Thread.sleep(500);
             } catch (InterruptedException ex) {
-                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
         if (Keyboard.isKeyDown(Keyboard.KEY_N)) {
@@ -192,7 +194,7 @@ public class Main extends PalloApp {
             System.out.println(s.getMaterial().getShininess());
         }
         if (Keyboard.isKeyDown(Keyboard.KEY_M)) {
-            //this.getRenderer().getMainCam().getTransform().setRotation((float) (System.currentTimeMillis() % 2000 * Math.PI / 1000f));
+            //this.getRenderer().getAppCam().getTransform().setRotation((float) (System.currentTimeMillis() % 2000 * Math.PI / 1000f));
             //s.getTransform().setRotation((float) (System.currentTimeMillis() % 2000 * Math.PI / 1000f));
             ln.getParent().getTransform().setRotation((float) (System.currentTimeMillis() % 2000 * Math.PI / 1000f));
         }
@@ -216,7 +218,7 @@ public class Main extends PalloApp {
             try {
                 Thread.sleep(50);
             } catch (InterruptedException ex) {
-                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
             }
             l = new PointLight(new Vector3f((float) Math.random(), (float) Math.random(), (float) Math.random()));
             l.getTransform().setLocalPosition(new Vector2f((float) (Math.random() * 2 - 1), (float) (Math.random() * 2 - 1)));
