@@ -38,7 +38,7 @@ public class PalloDemo01 extends PalloApp {
     @Override
     protected void Init() {
         this.getRenderer().getMainCam().setViewSize(800, 600);
-        AssetManager.addDir(new File("assets_001"));
+        AssetManager.addDir(new File("resources/assets_001"));
 
         Spatial s = new Spatial(AssetManager.getMesh("mesh"), AssetManager.getMaterial("apina"));
         s.getTransform().setScale(800, 600);
@@ -70,7 +70,7 @@ public class PalloDemo01 extends PalloApp {
                 rootNode.addChild(b);
             }
         }
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 5; i++) {
             ln = new Ball();
             rootNode.addChild(ln);
         }

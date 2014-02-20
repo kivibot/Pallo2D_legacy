@@ -64,7 +64,7 @@ public class Renderer {
     private FloatBuffer[] matbufs = new FloatBuffer[9];
 
     public Renderer(int w, int h) {
-        AssetManager.addDir(new File("assets"));
+        AssetManager.addDir(new File("resources/assets"));
 
         pass0_fbo = new FBO(w, h);
 

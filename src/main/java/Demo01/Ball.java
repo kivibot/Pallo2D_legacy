@@ -23,7 +23,7 @@ public class Ball extends GameObject {
 
     private ParticleEmitter fire, fire2;
 
-    private Vector2f velo = new Vector2f((float) Math.random() * 10 - 5, (float) Math.random() * 10 - 5);
+    private Vector2f velo = new Vector2f((float) Math.random() * 20 - 10, (float) Math.random() * 20 - 10);
 
     @Override
     public boolean Init() {

@@ -28,6 +28,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
@@ -61,7 +62,11 @@ public class AssetManager {
         }
 
         if (f.getName().endsWith(".json")) {
-            processJSON(new JSONObject(readFileToString(f)));
+            try {
+                processJSON(new JSONObject(readFileToString(f)));
+            } catch (JSONException ex) {
+                Logger.getLogger(AssetManager.class.getName()).log(Level.SEVERE, null, ex);
+            }
             System.out.println("loaded " + f);
         } else if (f.getName().endsWith(".png")) {
             loadAsTexture(f);
@@ -114,10 +119,9 @@ public class AssetManager {
             //try to make
             JSONObject jso = shader_prog.get(key);
             if (jso != null) {
-                String ve = shader_parts.get(jso.getString("vertex"));
-                String fr = shader_parts.get(jso.getString("fragment"));
-
-                if (ve != null && fr != null) {
+                try {
+                    String ve = shader_parts.get(jso.getString("vertex"));
+                    String fr = shader_parts.get(jso.getString("fragment"));
 
                     String[] defines;
 
@@ -170,6 +174,9 @@ public class AssetManager {
                     s = new Shader(key, sid);
                     shaders.put(key, s);
                     return s;
+
+                } catch (JSONException ex) {
+                    Logger.getLogger(AssetManager.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
 
@@ -178,40 +185,49 @@ public class AssetManager {
     }
 
     public static Material getMaterial(String key) {
-        Material m = materials_ready.get(key);
-        if (m != null) {
-            return m;
+        try {
+            Material m = materials_ready.get(key);
+            if (m != null) {
+                return m;
+            }
+            JSONObject jso = materials.get(key);
+            if (jso == null) {
+                return Material.DEFAULT;
+            }
+            Texture diffuse = getTexture(jso.getString("diffuse"));
+            Texture normal = Texture.DEFAULT;
+            Texture gloss = Texture.DEFAULT;
+            if (jso.getInt("version") >= 2) {
+                normal = getTexture(jso.getString("normal"));
+            }
+            if (jso.getInt("version") >= 3) {
+                gloss = getTexture(jso.getString("gloss"));
+            }
+            Shader shader = getShader(jso.getString("shader"));
+            Material mat = new Material(key, diffuse, normal, gloss, shader);
+            materials_ready.put(key, mat);
+            return mat;
+        } catch (JSONException ex) {
+            Logger.getLogger(AssetManager.class.getName()).log(Level.SEVERE, null, ex);
         }
-        JSONObject jso = materials.get(key);
-        if (jso == null) {
-            return Material.DEFAULT;
-        }
-        Texture diffuse = getTexture(jso.getString("diffuse"));
-        Texture normal = Texture.DEFAULT;
-        Texture gloss = Texture.DEFAULT;
-        if (jso.getInt("version") >= 2) {
-            normal = getTexture(jso.getString("normal"));
-        }
-        if (jso.getInt("version") >= 3) {
-            gloss = getTexture(jso.getString("gloss"));
-        }
-        Shader shader = getShader(jso.getString("shader"));
-        Material mat = new Material(key, diffuse, normal, gloss, shader);
-        materials_ready.put(key, mat);
-        return mat;
+        return Material.DEFAULT;
     }
 
     private static void processJSON(JSONObject jso) {
-        if (jso.getInt("version") > maxVer || jso.getInt("version") < minVer) {
-            return;
-        }
-        switch (jso.getString("type")) {
-            case "material":
-                materials.put(jso.getString("name"), jso);
-                break;
-            case "shader":
-                shader_prog.put(jso.getString("name"), jso);
-                break;
+        try {
+            if (jso.getInt("version") > maxVer || jso.getInt("version") < minVer) {
+                return;
+            }
+            switch (jso.getString("type")) {
+                case "material":
+                    materials.put(jso.getString("name"), jso);
+                    break;
+                case "shader":
+                    shader_prog.put(jso.getString("name"), jso);
+                    break;
+            }
+        } catch (JSONException ex) {
+            Logger.getLogger(AssetManager.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
