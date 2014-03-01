@@ -17,7 +17,7 @@ public class FBO extends GLObject {
 
     public static final FBO DEFAULT = new FBO(0);
     
-    private VertexBuffer targets = new VertexBuffer(VertexBuffer.Type.Integer, VertexBuffer.Usage.Static);
+    private VertexBuffer targets = new VertexBuffer(VertexBuffer.Type.Index, VertexBuffer.Usage.Static, VertexBuffer.Format.Integer);
     private List<Texture> textures = new ArrayList<>();
     private Vector2f dim;
     

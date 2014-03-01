@@ -37,11 +37,11 @@ public class DirectionalLight extends Light {
         fb.flip();
         ib.flip();
 
-        VertexBuffer vb = new VertexBuffer(VertexBuffer.Type.Float, VertexBuffer.Usage.Dynamic);
-        VertexBuffer vib = new VertexBuffer(VertexBuffer.Type.Integer, VertexBuffer.Usage.Dynamic);
+        VertexBuffer vb = new VertexBuffer(VertexBuffer.Type.Index, VertexBuffer.Usage.Dynamic, VertexBuffer.Format.Float);
+        VertexBuffer vib = new VertexBuffer(VertexBuffer.Type.Index, VertexBuffer.Usage.Dynamic, VertexBuffer.Format.Integer);
         vb.setData(fb);
         vib.setData(ib);
-        this.m = new Mesh().addBuffer("position", vb).addBuffer("index", vib);
+        this.m = new Mesh(vb, vib);
     }
 
     public Vector3f getDirection() {

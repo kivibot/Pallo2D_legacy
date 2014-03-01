@@ -1,30 +1,20 @@
 package fi.kivibot.pallo.rendering.light;
 
+import fi.kivibot.pallo.rendering.VertexBuffer;
 import java.nio.FloatBuffer;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.jbox2d.callbacks.RayCastCallback;
-import org.jbox2d.collision.RayCastInput;
-import org.jbox2d.collision.RayCastOutput;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.BodyDef;
-import org.jbox2d.dynamics.BodyType;
 import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.FixtureDef;
 import org.jbox2d.dynamics.World;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.util.vector.Matrix3f;
-import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 /**
  *
  * @author kivi
@@ -61,6 +51,10 @@ public class LightShadower implements RayCastCallback {
         return w;
     }
 
+    public void updateShadowCaster(ShadowCaster sc) {
+        
+    }
+
     public void updateLight(Light l_) {
         if (l_.getType() != Light.Type.POINT) {
             return;
@@ -79,7 +73,8 @@ public class LightShadower implements RayCastCallback {
             fb.put(new float[]{ret.x, ret.y});
         }
         fb.flip();
-        l.getMesh().getBuffer("position").setData(fb);
+        l.genMesh();
+        l.getMesh().getBuffer(VertexBuffer.Type.Position).setData(fb);
     }
 
     private Vec2 calcRay(Vec2 pos, Vec2 dir) {

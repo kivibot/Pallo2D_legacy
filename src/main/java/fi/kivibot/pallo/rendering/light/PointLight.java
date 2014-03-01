@@ -7,7 +7,6 @@ package fi.kivibot.pallo.rendering.light;
 
 import fi.kivibot.pallo.rendering.Mesh;
 import fi.kivibot.pallo.rendering.VertexBuffer;
-import fi.kivibot.util.TimeUtils;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import org.lwjgl.BufferUtils;
@@ -21,8 +20,8 @@ public class PointLight extends Light {
 
     private float fol = (float) (Math.PI * 2);
     private int rays = 2560;
-    private float height = 0.5f;
-    private float range = 01.7f;
+    private float height = 50f;
+    private float range = 100f;
 
     public PointLight(Vector3f c) {
         super(c, Type.POINT);
@@ -63,14 +62,14 @@ public class PointLight extends Light {
     @Deprecated
     public void genMesh() {
         FloatBuffer fb = null;
-        if (m != null && m.getBuffer("position") != null && m.getBuffer("position").getData().capacity() == 2 + this.rays * 2) {
-            fb = (FloatBuffer) m.getBuffer("position").getData().clear();
+        if (m != null && m.getBuffer(VertexBuffer.Type.Position) != null && m.getBuffer(VertexBuffer.Type.Position).getData().capacity() == 2 + this.rays * 2) {
+            fb = (FloatBuffer) m.getBuffer(VertexBuffer.Type.Position).getData().clear();
         } else {
             fb = BufferUtils.createFloatBuffer(2 + this.rays * 2);
         }
         IntBuffer ib = null;
-        if (m != null && m.getBuffer("index") != null && m.getBuffer("index").getData().capacity() == this.rays * 3) {
-            ib = (IntBuffer) m.getBuffer("index").getData().clear();
+        if (m != null && m.getBuffer(VertexBuffer.Type.Index) != null && m.getBuffer(VertexBuffer.Type.Index).getData().capacity() == this.rays * 3) {
+            ib = (IntBuffer) m.getBuffer(VertexBuffer.Type.Index).getData().clear();
         } else {
             ib = BufferUtils.createIntBuffer(3 * rays);
         }
@@ -92,15 +91,15 @@ public class PointLight extends Light {
         fb.flip();
         ib.flip();
         if (this.m == null) {
-            VertexBuffer vb = new VertexBuffer(VertexBuffer.Type.Float, VertexBuffer.Usage.Dynamic);
-            VertexBuffer vib = new VertexBuffer(VertexBuffer.Type.Integer, VertexBuffer.Usage.Dynamic);
+            VertexBuffer vb = new VertexBuffer(VertexBuffer.Type.Position, VertexBuffer.Usage.Dynamic, VertexBuffer.Format.Float);
+            VertexBuffer vib = new VertexBuffer(VertexBuffer.Type.Index, VertexBuffer.Usage.Dynamic, VertexBuffer.Format.Integer);
             vb.setData(fb);
             vib.setData(ib);
 
-            this.m = new Mesh().addBuffer("position", vb).addBuffer("index", vib);
+            this.m = new Mesh(vb, vib);
         } else {
-            VertexBuffer vb = m.getBuffer("position");
-            VertexBuffer vib = m.getBuffer("index");
+            VertexBuffer vb = m.getBuffer(VertexBuffer.Type.Position);
+            VertexBuffer vib = m.getBuffer(VertexBuffer.Type.Index);
             vb.setData(fb);
             vib.setData(ib);
         }

@@ -5,87 +5,43 @@
  */
 package fi.kivibot.pallo.rendering;
 
-import fi.kivibot.math.Rect;
-import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL15;
-import org.lwjgl.opengl.GL20;
-import org.lwjgl.opengl.GL30;
 
 /**
  *
  * @author kivi
  */
-public class Mesh extends GLObject {
+public class Mesh extends GLObject implements Cloneable {
 
-    private FloatBuffer ve, te;
-    private IntBuffer ib;
-
-    private Rect b;
-
-    private Map<String, VertexBuffer> buffers = new HashMap<>();
+    private Map<VertexBuffer.Type, VertexBuffer> buffers = new EnumMap<>(VertexBuffer.Type.class);
+    private List<VertexBuffer> bufferlist = new ArrayList<>();
 
     public Mesh() {
     }
 
-    public Set<Entry<String, VertexBuffer>> getBuffers() {
-        return this.buffers.entrySet();
-    }
-
-    public Mesh addBuffer(String name, VertexBuffer vb) {
-        buffers.put(name, vb);
-        return this;
-    }
-
-    public VertexBuffer getBuffer(String name) {
-        return this.buffers.get(name);
-    }
-
-    public Rect getBoundingBox() {
-        if (this.getBuffer("position").updateNeeded()) {
-            b = this.calcBoundingBox();
+    public Mesh(VertexBuffer... vbs) {
+        for (VertexBuffer vb : vbs) {
+            this.addBuffer(vb);
         }
-        return this.b;
     }
 
-    private Rect calcBoundingBox() {
-        float mix = 99999, miy = 99999, max = -99999, may = -99999;
-        VertexBuffer vertices = this.getBuffer("position");
-        for (int i = 0; i < vertices.getData().capacity(); i += 2) {
-            float x = ((FloatBuffer) vertices.getData()).get(i);
-            float y = ((FloatBuffer) vertices.getData()).get(i + 1);
-
-            if (x < mix) {
-                mix = x;
-            }
-            if (x > max) {
-                max = x;
-            }
-            if (y < miy) {
-                miy = y;
-            }
-            if (y > may) {
-                may = y;
-            }
-        }
-
-        return new Rect(mix, miy, max - mix, may - miy);
+    public List<VertexBuffer> getBuffers() {
+        return this.bufferlist;
     }
 
-    @Override
-    public Mesh clone() {
-        Mesh m = new Mesh();
-        for (Entry<String, VertexBuffer> e : this.buffers.entrySet()) {
-            m.addBuffer(e.getKey(), e.getValue().clone());
+    public void addBuffer(VertexBuffer vb) {
+        if(buffers.containsKey(vb.getType())){
+            bufferlist.remove(buffers.get(vb.getType()));
         }
-        return m;
+        buffers.put(vb.getType(), vb);
+        bufferlist.add(vb);
+    }
+
+    public VertexBuffer getBuffer(VertexBuffer.Type t) {
+        return this.buffers.get(t);
     }
 
     @Override

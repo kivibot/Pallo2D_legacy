@@ -4,6 +4,7 @@
  * and open the template in the editor.
  */
 package fi.kivibot.pallo.rendering;
+
 import fi.kivibot.math.Rect;
 import fi.kivibot.misc.Node;
 import fi.kivibot.pallo.assets.AssetManager;
@@ -14,6 +15,7 @@ import fi.kivibot.pallo.rendering.light.LightShadower;
 import fi.kivibot.pallo.rendering.light.PointLight;
 import fi.kivibot.pallo.rendering.light.PointLightArray;
 import java.io.File;
+import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -25,6 +27,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Queue;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
@@ -64,7 +68,7 @@ public class Renderer {
     private FloatBuffer[] matbufs = new FloatBuffer[9];
 
     public Renderer(int w, int h) {
-        AssetManager.addDir(new File("resources/assets"));
+        AssetManager.add("/assets");
 
         pass0_fbo = new FBO(w, h);
 
@@ -78,20 +82,20 @@ public class Renderer {
         FloatBuffer fb0 = BufferUtils.createFloatBuffer(8);
         fb0.put(new float[]{-1, -1, -1, 1, 1, 1, 1, -1});
         fb0.flip();
-        VertexBuffer vb0 = new VertexBuffer(VertexBuffer.Type.Float, VertexBuffer.Usage.Dynamic);
+        VertexBuffer vb0 = new VertexBuffer(VertexBuffer.Type.Position, VertexBuffer.Usage.Dynamic, VertexBuffer.Format.Float);
         vb0.setData(fb0);
         FloatBuffer fb1 = BufferUtils.createFloatBuffer(8);
         fb1.put(new float[]{0, 0, 0, 1, 1, 1, 1, 0});
         fb1.flip();
-        VertexBuffer vb1 = new VertexBuffer(VertexBuffer.Type.Float, VertexBuffer.Usage.Dynamic);
+        VertexBuffer vb1 = new VertexBuffer(VertexBuffer.Type.TexCoord, VertexBuffer.Usage.Dynamic, VertexBuffer.Format.Float);
         vb1.setData(fb0);
         IntBuffer ib0 = BufferUtils.createIntBuffer(6);
         ib0.put(new int[]{0, 1, 2, 0, 2, 3});
         ib0.flip();
-        VertexBuffer vb2 = new VertexBuffer(VertexBuffer.Type.Integer, VertexBuffer.Usage.Dynamic);
+        VertexBuffer vb2 = new VertexBuffer(VertexBuffer.Type.Index, VertexBuffer.Usage.Dynamic, VertexBuffer.Format.Integer);
         vb2.setData(ib0);
-        Mesh m = new Mesh().addBuffer("position", vb0).addBuffer("texcoord", vb1).addBuffer("index", vb2);
-        Mesh m2 = m.clone();//= new Mesh(new float[]{-1, -1, -1, 1, 1, 1, 1, -1}, new int[]{0, 1, 2, 0, 2, 3}, new float[]{0, 1, 0, 0, 1, 0, 1, 1});
+        Mesh m = new Mesh(vb0, vb1, vb2);
+        Mesh m2 = m;//= new Mesh(new float[]{-1, -1, -1, 1, 1, 1, 1, -1}, new int[]{0, 1, 2, 0, 2, 3}, new float[]{0, 1, 0, 0, 1, 0, 1, 1});
 
         Material ma = new Material("renderer_screen", Texture.DEFAULT, AssetManager.getShader("shader0"));
         Material ma2 = new Material("renderer_screen", Texture.DEFAULT, AssetManager.getShader("light_preview"));
@@ -144,8 +148,8 @@ public class Renderer {
 
         GL11.glDisable(GL11.GL_BLEND);
 
-        this.updateMesh(screen.getMesh(), new String[]{"position", "texcoord"});
-        this.updateMesh(screen2.getMesh(), new String[]{"position", "texcoord"});
+        this.updateMesh(screen.getMesh(), new VertexBuffer.Type[]{VertexBuffer.Type.Position, VertexBuffer.Type.TexCoord});
+        this.updateMesh(screen2.getMesh(), new VertexBuffer.Type[]{VertexBuffer.Type.Position, VertexBuffer.Type.TexCoord});
 
         this.updateFBO(pass0_fbo);
 
@@ -260,7 +264,7 @@ public class Renderer {
             return;
         }
 
-        this.updateMesh(l.getMesh(), new String[]{"position", "color", "lpos"});
+        this.updateMesh(l.getMesh(), new VertexBuffer.Type[]{VertexBuffer.Type.Position, VertexBuffer.Type.Color, VertexBuffer.Type.Lpos});
 
         switch (l.getType()) {
             case POINT:
@@ -333,8 +337,8 @@ public class Renderer {
 
         //RENDERING
         GL30.glBindVertexArray(l.getMesh().getID());
-        GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, l.getMesh().getBuffer("index").getID());
-        GL11.glDrawElements(GL11.GL_TRIANGLES, l.getMesh().getBuffer("index").getData().capacity(), GL11.GL_UNSIGNED_INT, 0);
+        GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, l.getMesh().getBuffer(VertexBuffer.Type.Index).getID());
+        GL11.glDrawElements(GL11.GL_TRIANGLES, l.getMesh().getBuffer(VertexBuffer.Type.Index).getData().capacity(), GL11.GL_UNSIGNED_INT, 0);
 
     }
 
@@ -376,7 +380,7 @@ public class Renderer {
             id = matList.size() - 1;
         }
 
-        this.updateMesh(mesh, new String[]{"position", "texcoord"});
+        this.updateMesh(mesh, new VertexBuffer.Type[]{VertexBuffer.Type.Position, VertexBuffer.Type.TexCoord});
 
         GL20.glUniform1i(GL20.glGetUniformLocation(pass0.getID(), "matID"), id);
 
@@ -422,12 +426,12 @@ public class Renderer {
 
         //RENDERING
         GL30.glBindVertexArray(s.getMesh().getID());
-        GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, s.getMesh().getBuffer("index").getID());
-        GL11.glDrawElements(GL11.GL_TRIANGLES, s.getMesh().getBuffer("index").getData().capacity(), GL11.GL_UNSIGNED_INT, 0);
+        GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, s.getMesh().getBuffer(VertexBuffer.Type.Index).getID());
+        GL11.glDrawElements(GL11.GL_TRIANGLES, s.getMesh().getBuffer(VertexBuffer.Type.Index).getData().capacity(), GL11.GL_UNSIGNED_INT, 0);
 
     }
 
-    private void updateMesh(Mesh m, String[] vapos) {
+    private void updateMesh(Mesh m, VertexBuffer.Type[] vapos) {
         boolean created = false;
         if (m.getID() == -1) {
             m.setID(GL30.glGenVertexArrays());
@@ -445,11 +449,12 @@ public class Renderer {
                 GL20.glEnableVertexAttribArray(i);
             }
         }
-        List<String> vap = Arrays.asList(vapos);
-        for (Entry<String, VertexBuffer> e : m.getBuffers()) {
-            VertexBuffer vb = e.getValue();
+        
+        List<VertexBuffer.Type> vap = Arrays.asList(vapos);
+        for (VertexBuffer vb : m.getBuffers()) {
             boolean a = this.updateVertexBuffer(vb);
-            int index = vap.indexOf(e.getKey());
+            int index = vap.indexOf(vb.getType());
+            
             if (index != -1 && (a || created)) {
                 GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vb.getID());
                 //argumentit
@@ -474,12 +479,12 @@ public class Renderer {
 
         int id = vb.getID();
 
-        int trg = getBufferTarget(vb.getTarget());
+        int trg = getBufferTarget(vb.getType());
 
         if (vb.updateNeeded()) {
             GL15.glBindBuffer(trg, id);
             if (vb.hasSizeChanged()) {
-                switch (vb.getType()) {
+                switch (vb.getFormat()) {
                     case Float:
                         GL15.glBufferData(trg, (FloatBuffer) vb.getData(), UsgeHintToGL(vb.getUsageHint()));
                         break;
@@ -489,7 +494,7 @@ public class Renderer {
                 }
 
             } else if (vb.hasDataChanged()) {
-                switch (vb.getType()) {
+                switch (vb.getFormat()) {
                     case Float:
                         GL15.glBufferSubData(trg, 0, (FloatBuffer) vb.getData());
                         break;
@@ -504,13 +509,15 @@ public class Renderer {
         return ret;
     }
 
-    private int getBufferTarget(VertexBuffer.Target t) {
+    private int getBufferTarget(VertexBuffer.Type t) {
         switch (t) {
-            case Vertex:
+            case Position:
+            case TexCoord:
                 return GL15.GL_ARRAY_BUFFER;
             case Index:
                 return GL15.GL_ELEMENT_ARRAY_BUFFER;
         }
+        System.out.println("getBufferTarget - " + t.name() + " is not supported");
         return 0;
     }
 

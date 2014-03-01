@@ -81,7 +81,6 @@
                         <classpath />
                         <argument>${main.class}</argument>
                     </arguments>
-                    <workingDirectory>${basedir}/src/main</workingDirectory>
                 </configuration>
             </plugin>
         </plugins>

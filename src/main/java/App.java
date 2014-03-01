@@ -1,3 +1,4 @@
+
 import fi.kivibot.misc.Node;
 import fi.kivibot.pallo.PalloApp;
 import fi.kivibot.pallo.assets.AssetManager;
@@ -7,6 +8,7 @@ import fi.kivibot.pallo.rendering.light.PointLight;
 import fi.kivibot.pallo.rendering.Material;
 import fi.kivibot.pallo.rendering.Mesh;
 import fi.kivibot.pallo.rendering.Spatial;
+import fi.kivibot.pallo.rendering.VertexBuffer;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -23,10 +25,7 @@ import org.lwjgl.util.WaveData;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
-import Demo01.PalloDemo01;
 import fi.kivibot.pallo.rendering.light.AmbientLight;
-import java.util.LinkedList;
-import java.util.List;
 
 
 /*
@@ -41,10 +40,7 @@ import java.util.List;
 public class App extends PalloApp {
 
     public static void main(String[] args) {
-        System.out.println(System.getProperty("java.library.path").replace(";", "\n"));
-
-        new PalloDemo01().start();
-        //new App().start();
+        new App().start();
     }
 
     private Spatial s;
@@ -59,7 +55,8 @@ public class App extends PalloApp {
 
     @Override
     protected void Init() {
-        AssetManager.addDir(new File("resources/assets/"));
+        this.getRenderer().getMainCam().setViewSize(2, 2);
+        AssetManager.add("/assets/");
         Material ma = AssetManager.getMaterial("apina");
         ma.setSpecularColor(new Vector3f(1, 1, 1));
 
@@ -107,22 +104,16 @@ public class App extends PalloApp {
         rootNode.addChild(al);
 
         this.getAudioEngine().setActiveListener(al);
+        for (int i = 0; i < 1; i++) {
+            AudioSource as = new AudioSource(WaveData.create(new BufferedInputStream(App.class.getResourceAsStream("assets/test3.wav"))));
 
-        try {
-            for (int i = 0; i < 1; i++) {
-                AudioSource as = new AudioSource(WaveData.create(new BufferedInputStream(new FileInputStream(new File("assets/test3.wav")))));
+            as.getTransform().setLocalPosition(new Vector2f(i, 0f));
 
-                as.getTransform().setLocalPosition(new Vector2f(i, 0f));
-
-                as.play();
-
-                rootNode.addChild(as);
-            }
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
+//            as.play();
+            rootNode.addChild(as);
         }
 
-        rootNode.addChild(new AmbientLight(new Vector3f()));
+        rootNode.addChild(new AmbientLight(new Vector3f(0.1f, 0.1f, 0.1f)));
 
     }
 
@@ -138,12 +129,12 @@ public class App extends PalloApp {
             for (int ib = 0; ib < 1; ib++) {
 
                 ic++;
-                FloatBuffer fb = BufferUtils.createFloatBuffer(8 + s.getMesh().getBuffer("position").getData().capacity());
-                FloatBuffer fb2 = (FloatBuffer) s.getMesh().getBuffer("position").getData();
+                FloatBuffer fb = BufferUtils.createFloatBuffer(8 + s.getMesh().getBuffer(VertexBuffer.Type.Position).getData().capacity());
+                FloatBuffer fb2 = (FloatBuffer) s.getMesh().getBuffer(VertexBuffer.Type.Position).getData();
                 fb.put(fb2);
                 fb.put(new float[]{x, y, x, y + .1f, x + .1f, y + .1f, x + .1f, y});
                 fb.flip();
-                s.getMesh().getBuffer("position").setData(fb);
+                s.getMesh().getBuffer(VertexBuffer.Type.Position).setData(fb);
 
                 IntBuffer fb3 = BufferUtils.createIntBuffer(ic * 6);
                 FloatBuffer fb4 = BufferUtils.createFloatBuffer(ic * 8);
@@ -154,8 +145,8 @@ public class App extends PalloApp {
                 }
                 fb3.flip();
                 fb4.flip();
-                s.getMesh().getBuffer("index").setData(fb3);
-                s.getMesh().getBuffer("texcoord").setData(fb4);
+                s.getMesh().getBuffer(VertexBuffer.Type.Index).setData(fb3);
+                s.getMesh().getBuffer(VertexBuffer.Type.TexCoord).setData(fb4);
 
             }
         }

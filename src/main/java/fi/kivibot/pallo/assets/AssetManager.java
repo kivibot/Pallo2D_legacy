@@ -8,6 +8,7 @@ package fi.kivibot.pallo.assets;
 import fi.kivibot.pallo.rendering.Material;
 import fi.kivibot.pallo.rendering.Mesh;
 import fi.kivibot.pallo.rendering.Shader;
+import fi.kivibot.pallo.rendering.Spatial;
 import fi.kivibot.pallo.rendering.Texture;
 import fi.kivibot.pallo.rendering.VertexBuffer;
 import java.awt.image.BufferedImage;
@@ -18,6 +19,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -55,7 +57,7 @@ public class AssetManager {
 
     private static final int minVer = 1, maxVer = 4;
 
-    public static void addFile(File f) {
+    private static void addFile(File f) {
         if (f.isDirectory()) {
             addDir(f);
             return;
@@ -82,7 +84,7 @@ public class AssetManager {
         }
     }
 
-    public static void addDir(File f) {
+    private static void addDir(File f) {
         if (f.isFile()) {
             addFile(f);
             return;
@@ -90,6 +92,33 @@ public class AssetManager {
         for (File fi : f.listFiles()) {
             addFile(fi);
         }
+    }
+
+    public static void add(String s) {
+        URL url = AssetManager.class.getResource(s);
+        switch (url.getProtocol()) {
+            case "file":
+                File f = new File(url.getFile());
+                if (f.isDirectory()) {
+                    AssetManager.addDir(f);
+                } else {
+                    AssetManager.addFile(f);
+                }
+                break;
+            case "jar":
+                System.out.println("JAR FILES NOT SUPPORTED!");
+                break;
+        }
+    }
+
+    public static Spatial getSpatial(String mekey, String makey) {
+        Material ma = AssetManager.getMaterial(makey);
+        Mesh me = AssetManager.getMesh(mekey);
+        return new Spatial(me, ma);
+    }
+
+    public static Spatial getSpatial(String key) {
+        return getSpatial(key, key);
     }
 
     public static Mesh getMesh(String key) {
@@ -377,13 +406,13 @@ public class AssetManager {
         ver.flip();
         ind.flip();
         tec.flip();
-        VertexBuffer v = new VertexBuffer(VertexBuffer.Type.Float, VertexBuffer.Usage.Dynamic);
-        VertexBuffer t = new VertexBuffer(VertexBuffer.Type.Float, VertexBuffer.Usage.Dynamic);
-        VertexBuffer i = new VertexBuffer(VertexBuffer.Type.Integer, VertexBuffer.Usage.Dynamic);
+        VertexBuffer v = new VertexBuffer(VertexBuffer.Type.Position, VertexBuffer.Usage.Dynamic, VertexBuffer.Format.Float);
+        VertexBuffer t = new VertexBuffer(VertexBuffer.Type.TexCoord, VertexBuffer.Usage.Dynamic, VertexBuffer.Format.Float);
+        VertexBuffer i = new VertexBuffer(VertexBuffer.Type.Index, VertexBuffer.Usage.Dynamic, VertexBuffer.Format.Integer);
         v.setData(ver);
         t.setData(tec);
         i.setData(ind);
-        Mesh m = new Mesh().addBuffer("position", v).addBuffer("texcoord", t).addBuffer("index", i);
+        Mesh m = new Mesh(v, t, i);
         meshes.put(name, m);
     }
 

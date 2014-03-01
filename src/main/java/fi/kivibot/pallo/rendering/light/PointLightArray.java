@@ -48,20 +48,17 @@ public class PointLightArray extends Light {
         FloatBuffer fb_c = BufferUtils.createFloatBuffer(0);
         FloatBuffer fb_d = BufferUtils.createFloatBuffer(0);
         IntBuffer ib = BufferUtils.createIntBuffer(0);
-        VertexBuffer vpb = new VertexBuffer(VertexBuffer.Type.Float, VertexBuffer.Usage.Dynamic);
-        VertexBuffer vcb = new VertexBuffer(VertexBuffer.Type.Float, VertexBuffer.Usage.Dynamic);
-        VertexBuffer vlpd = new VertexBuffer(VertexBuffer.Type.Float, VertexBuffer.Usage.Dynamic);
-        VertexBuffer vib = new VertexBuffer(VertexBuffer.Type.Integer, VertexBuffer.Usage.Dynamic);
+        VertexBuffer vpb = new VertexBuffer(VertexBuffer.Type.Position, VertexBuffer.Usage.Dynamic, VertexBuffer.Format.Float);
+        VertexBuffer vcb = new VertexBuffer(VertexBuffer.Type.Color, VertexBuffer.Usage.Dynamic, VertexBuffer.Format.Float);
+        VertexBuffer vlpd = new VertexBuffer(VertexBuffer.Type.Lpos, VertexBuffer.Usage.Dynamic, VertexBuffer.Format.Float);
+        VertexBuffer vib = new VertexBuffer(VertexBuffer.Type.Index, VertexBuffer.Usage.Dynamic, VertexBuffer.Format.Integer);
         vpb.setData(fb_p);
         vcb.setData(fb_c);
         vcb.setVertexSize(3);
         vlpd.setData(fb_d);
         vlpd.setVertexSize(3);
         vib.setData(ib);
-        this.m = new Mesh().addBuffer("position", vpb)
-                .addBuffer("index", vib)
-                .addBuffer("color", vcb)
-                .addBuffer("lpos", vlpd);
+        this.m = new Mesh(vpb, vib, vcb, vlpd);
     }
 
     public void addLight(Vector3f color, Vector3f position, float len) {
@@ -112,10 +109,10 @@ public class PointLightArray extends Light {
             ibs += al.ib.length;
             lpds += al.lpd.length;
         }
-        FloatBuffer pb = (FloatBuffer) m.getBuffer("position").getData();
-        FloatBuffer cb = (FloatBuffer) m.getBuffer("color").getData();
-        FloatBuffer lpd = (FloatBuffer) m.getBuffer("lpos").getData();
-        IntBuffer ib = (IntBuffer) m.getBuffer("index").getData();
+        FloatBuffer pb = (FloatBuffer) m.getBuffer(VertexBuffer.Type.Position).getData();
+        FloatBuffer cb = (FloatBuffer) m.getBuffer(VertexBuffer.Type.Color).getData();
+        FloatBuffer lpd = (FloatBuffer) m.getBuffer(VertexBuffer.Type.Lpos).getData();
+        IntBuffer ib = (IntBuffer) m.getBuffer(VertexBuffer.Type.Index).getData();
         if (pb.capacity() >= pbs) {
             pb = (FloatBuffer) pb.clear();
         } else {
@@ -146,10 +143,10 @@ public class PointLightArray extends Light {
         pb.flip();
         lpd.flip();
         cb.flip();
-        m.getBuffer("index").setData(ib);
-        m.getBuffer("position").setData(pb);
-        m.getBuffer("lpos").setData(lpd);
-        m.getBuffer("color").setData(cb);
+        m.getBuffer(VertexBuffer.Type.Index).setData(ib);
+        m.getBuffer(VertexBuffer.Type.Position).setData(pb);
+        m.getBuffer(VertexBuffer.Type.Lpos).setData(lpd);
+        m.getBuffer(VertexBuffer.Type.Color).setData(cb);
     }
 
     private void genMesh(ArrayLight al, int ibase) {

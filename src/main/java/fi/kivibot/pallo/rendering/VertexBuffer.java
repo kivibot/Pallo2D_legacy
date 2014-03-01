@@ -15,19 +15,27 @@ import java.nio.IntBuffer;
  */
 public class VertexBuffer extends GLObject implements Cloneable {
 
-    public static enum Target {
+    public static enum Type {
 
-        Vertex, Index
+        Position,
+        TexCoord,
+        Index,
+        Color,
+        Lpos
     }
 
     public static enum Usage {
 
-        Static, Dynamic, Stream
+        Static,
+        Dynamic,
+        Stream,
+        CPU
     }
 
-    public static enum Type {
+    public static enum Format {
 
-        Float, Integer
+        Float,
+        Integer
     }
 
     private Buffer data;
@@ -35,17 +43,13 @@ public class VertexBuffer extends GLObject implements Cloneable {
     private boolean dataChanged;
     private Usage usage;
     private Type type;
-    private Target target;
+    private Format format;
     private int vertsiz = 2;
 
-    public VertexBuffer(Type t, Usage u) {
-        this(t, u, Target.Vertex);
-    }
-
-    public VertexBuffer(Type t, Usage u, Target ta) {
+    public VertexBuffer(Type t, Usage u, Format fo) {
         this.usage = u;
         this.type = t;
-        this.target = ta;
+        this.format = fo;
     }
 
     public boolean hasSizeChanged() {
@@ -96,14 +100,14 @@ public class VertexBuffer extends GLObject implements Cloneable {
     public Type getType() {
         return this.type;
     }
-
-    public Target getTarget() {
-        return target;
+    
+    public Format getFormat(){
+        return format;
     }
 
     @Override
     public VertexBuffer clone() {
-        VertexBuffer vb = new VertexBuffer(type, usage, target);
+        VertexBuffer vb = new VertexBuffer(type, usage, format);
         vb.setData(data);
         return vb;
     }
@@ -112,7 +116,7 @@ public class VertexBuffer extends GLObject implements Cloneable {
     public String toString() {
         String dat = new String();
         String typ = null;
-        switch (type) {
+        switch (format) {
             case Float:
                 typ = "Float";
                 for (int i = 0; i < data.capacity(); i++) {
