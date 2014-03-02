@@ -5,5 +5,5 @@
 	"diffuse": "CorrugatedSharp-ColorMap",
 	"normal": "CorrugatedSharp-NormalMap",
 	"gloss": "wall2-gloss",
-	"shader": "shader1",
+	"shader": "shader1"
 }

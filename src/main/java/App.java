@@ -7,12 +7,10 @@ import fi.kivibot.pallo.audio.AudioSource;
 import fi.kivibot.pallo.rendering.light.PointLight;
 import fi.kivibot.pallo.rendering.Material;
 import fi.kivibot.pallo.rendering.Mesh;
+import fi.kivibot.pallo.rendering.ParticleEmitter;
 import fi.kivibot.pallo.rendering.Spatial;
 import fi.kivibot.pallo.rendering.VertexBuffer;
 import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.logging.Level;
@@ -25,14 +23,6 @@ import org.lwjgl.util.WaveData;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
-import fi.kivibot.pallo.rendering.light.AmbientLight;
-
-
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 /**
  *
  * @author kivi
@@ -55,13 +45,13 @@ public class App extends PalloApp {
 
     @Override
     protected void Init() {
-        this.getRenderer().getMainCam().setViewSize(2, 2);
         AssetManager.add("/assets/");
         Material ma = AssetManager.getMaterial("apina");
         ma.setSpecularColor(new Vector3f(1, 1, 1));
 
         //Mesh me = new Mesh(new float[]{x - 0.5f, y - 0.5f, x - 0.5f, y + 0.5f, x + 0.5f, y + 0.5f, x + 0.5f, y - 0.5f}, new int[]{0, 1, 2, 0, 2, 3}, new float[]{0, 1, 0, 0, 1, 0, 1, 1});
         s = new Spatial(AssetManager.getMesh("mesh"), ma);
+        s.getTransform().setScale(800, 600);
 
         n = new Node();
         n.addChild(s);
@@ -86,18 +76,22 @@ public class App extends PalloApp {
          ln.addChild(l);
          */
         float rc = 1;
-        float ra = 0.01f;
-        for (int i = 0; i < 0; i++) {
+        float ra = 0f;
+        for (int i = 0; i < rc; i++) {
             float a = (float) (2f * Math.PI / rc * i);
             float s = (float) (Math.sin(a) * ra);
             float c = (float) (Math.cos(a) * ra);
-            l = new PointLight(new Vector3f(1f / rc, 1f / rc, 1f / rc));
+            //l = new PointLight(new Vector3f(0.68f / rc, 0.88f / rc, 1f / rc));
+            l = new PointLight(new Vector3f(0.01f / rc, 0.8f / rc, 0.8f / rc));
             l.getTransform().setLocalPosition(new Vector2f(c, s));
+            l.setQuadraticAttenuation(l.getQuadraticAttenuation()/2f);
+            l.setLinearAttenuation(0.001f);
+            l.setRange(800);
             l.genMesh();
             ln.addChild(l);
         }
 
-        rootNode.addChild(new EpicParticles(10));
+        rootNode.addChild(new ParticleEmitter());
 
         al = new AudioListener(true);
 
@@ -113,8 +107,9 @@ public class App extends PalloApp {
             rootNode.addChild(as);
         }
 
-        rootNode.addChild(new AmbientLight(new Vector3f(0.1f, 0.1f, 0.1f)));
+        rootNode.addChild(new PointLight(new Vector3f(1f, 0.675f, 0.380f)));
 
+        //rootNode.addChild(new AmbientLight(new Vector3f(0.1f, 0.3f, 0.1f)));
     }
 
     @Override
@@ -122,8 +117,8 @@ public class App extends PalloApp {
 
         al.getTransform().setLocalPosition(new Vector2f((float) Math.cos(System.currentTimeMillis() / 1000.0) * 1.5f, (float) Math.sin(System.currentTimeMillis() / 1000.0) * 1.5f));
 
-        x = Mouse.getX() / 400f - 1f;
-        y = Mouse.getY() / 300f - 1f;
+        x = Mouse.getX() - 400f;
+        y = Mouse.getY() - 300f;
 
         if (Keyboard.isKeyDown(Keyboard.KEY_SPACE)) {
             for (int ib = 0; ib < 1; ib++) {
@@ -197,7 +192,7 @@ public class App extends PalloApp {
             s.getTransform().translate(new Vector2f(0, -0.01f));
         }
         if (Keyboard.isKeyDown(Keyboard.KEY_G)) {
-            rootNode.addChild(new EpicParticles(10));
+            rootNode.addChild(new ParticleEmitter());
         }
         if (Keyboard.isKeyDown(Keyboard.KEY_NUMPAD4)) {
             GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE);

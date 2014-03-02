@@ -14,8 +14,6 @@ import fi.kivibot.pallo.rendering.light.Light;
 import fi.kivibot.pallo.rendering.light.LightShadower;
 import fi.kivibot.pallo.rendering.light.PointLight;
 import fi.kivibot.pallo.rendering.light.PointLightArray;
-import java.io.File;
-import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -25,10 +23,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Queue;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
@@ -289,8 +284,9 @@ public class Renderer {
                 matcb.flip();
                 GL20.glUniformMatrix3(GL20.glGetUniformLocation(s.getID(), "mat0"), false, mat0b);
                 GL20.glUniformMatrix3(GL20.glGetUniformLocation(s.getID(), "matc"), false, matcb);
-                GL20.glUniform1f(GL20.glGetUniformLocation(s.getID(), "attenuationSquare"), 0.000100f);
-                GL20.glUniform1f(GL20.glGetUniformLocation(s.getID(), "attenuationLinear"), 0.000000f);
+                GL20.glUniform1f(GL20.glGetUniformLocation(s.getID(), "attenuationSquare"), ((PointLight) l).getQuadraticAttenuation());
+                GL20.glUniform1f(GL20.glGetUniformLocation(s.getID(), "attenuationLinear"), ((PointLight) l).getLinearAttenuation());
+                GL20.glUniform1f(GL20.glGetUniformLocation(s.getID(), "attenuationConst"), ((PointLight) l).getConstantAttenuation());
                 break;
             case DIRECTIONAL:
                 ld = (FloatBuffer) this.matbufs[0].clear();
@@ -449,12 +445,12 @@ public class Renderer {
                 GL20.glEnableVertexAttribArray(i);
             }
         }
-        
+
         List<VertexBuffer.Type> vap = Arrays.asList(vapos);
         for (VertexBuffer vb : m.getBuffers()) {
             boolean a = this.updateVertexBuffer(vb);
             int index = vap.indexOf(vb.getType());
-            
+
             if (index != -1 && (a || created)) {
                 GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vb.getID());
                 //argumentit
@@ -513,6 +509,8 @@ public class Renderer {
         switch (t) {
             case Position:
             case TexCoord:
+            case Color:
+            case Lpos:
                 return GL15.GL_ARRAY_BUFFER;
             case Index:
                 return GL15.GL_ELEMENT_ARRAY_BUFFER;

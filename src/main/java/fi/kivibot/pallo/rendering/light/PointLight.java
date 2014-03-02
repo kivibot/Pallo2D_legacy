@@ -21,10 +21,13 @@ public class PointLight extends Light {
     private float fol = (float) (Math.PI * 2);
     private int rays = 2560;
     private float height = 50f;
-    private float range = 100f;
+    private float range = 800f;
+
+    private float quadratic_attenuation, linear_attenuation, constant_attenuation;
 
     public PointLight(Vector3f c) {
         super(c, Type.POINT);
+        this.quadratic_attenuation = 0.000100f;
     }
 
     public float getFOL() {
@@ -104,6 +107,30 @@ public class PointLight extends Light {
             vib.setData(ib);
         }
 
+    }
+
+    public float getQuadraticAttenuation() {
+        return this.quadratic_attenuation;
+    }
+
+    public float getLinearAttenuation() {
+        return this.linear_attenuation;
+    }
+
+    public float getConstantAttenuation() {
+        return this.constant_attenuation;
+    }
+
+    public void setQuadraticAttenuation(float f) {
+        this.quadratic_attenuation = f;
+    }
+
+    public void setLinearAttenuation(float f) {
+        this.linear_attenuation = f;
+    }
+
+    public void setConstantAttenuation(float f) {
+        this.constant_attenuation = f;
     }
 
 }

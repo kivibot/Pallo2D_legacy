@@ -5,5 +5,5 @@
 	"diffuse": "ball-diffuse",
 	"normal": "ball-normal",
 	"gloss": "ball-gloss",
-	"shader": "shader1",
+	"shader": "shader1"
 }

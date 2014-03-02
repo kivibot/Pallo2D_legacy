@@ -3,7 +3,7 @@
 	"type": "material",
 	"name": "apina",
 	"diffuse": "kapinaapina",
-	"normal": "monkeynormal",
+	"normal": "upnormals",
 	"gloss": "wall2-gloss",
-	"shader": "shader1",
+	"shader": "shader1"
 }

@@ -31,14 +31,14 @@ public class LightShadower implements RayCastCallback {
 
         FixtureDef fd = new FixtureDef();
         PolygonShape sd = new PolygonShape();
-        sd.setAsBox(40, 13f);
+        sd.setAsBox(25, 25);
         fd.shape = sd;
 
-        for (int i = 0; i < 6; i++) {
-            for (int j = 0; j < 8; j++) {
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 5; j++) {
 
                 BodyDef bd = new BodyDef();
-                bd.position = new Vec2(-300 + i * 120, 200 - j * 40);
+                bd.position = new Vec2((float)Math.random() * 700f - 350f, (float)Math.random() * 500f - 250f);
 
                 fixs.add(w.createBody(bd).createFixture(fd));
                 fixs.get(fixs.size() - 1).m_userData = i + "_" + j;
@@ -52,7 +52,7 @@ public class LightShadower implements RayCastCallback {
     }
 
     public void updateShadowCaster(ShadowCaster sc) {
-        
+
     }
 
     public void updateLight(Light l_) {

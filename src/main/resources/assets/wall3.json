@@ -4,5 +4,5 @@
 	"name": "wall3",
 	"diffuse": "GraniteWall-ColorMap",
 	"normal": "GraniteWall-NormalMap",
-	"shader": "shader1",
+	"shader": "shader1"
 }

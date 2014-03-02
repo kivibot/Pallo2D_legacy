@@ -14,6 +14,7 @@ uniform float li[lightsize];
 #ifdef POINT
 	uniform float attenuationSquare;
 	uniform float attenuationLinear;
+	uniform float attenuationConst;
 #endif
 
 #ifdef ARRAY
@@ -66,7 +67,7 @@ void main(void) {
 	
 		float d = length(ltm);
 	
-		float a = clamp(1.0 / ((d*attenuationLinear + pow(d,2)*attenuationSquare)),0.0,1.0);
+		float a = clamp(1.0 / ((d*attenuationLinear + pow(d,2)*attenuationSquare)+attenuationConst),0.0,1.0);
 	
 		ltm /= d;
 		

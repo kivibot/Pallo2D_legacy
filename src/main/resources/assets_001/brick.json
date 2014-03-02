@@ -5,5 +5,5 @@
 	"diffuse": "brick-diffuse",
 	"normal": "brick-normal",
 	"gloss": "brick-gloss",
-	"shader": "shader1",
+	"shader": "shader1"
 }

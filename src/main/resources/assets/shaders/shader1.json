@@ -7,6 +7,6 @@
 	"varloc": [
 		{ "name":"out_Color", "id":0, "type":"frag"},
 		{ "name":"out_Position", "id":1, "type":"frag"},
-		{ "name":"out_Normal", "id":2, "type":"frag"},
+		{ "name":"out_Normal", "id":2, "type":"frag"}
 	]
 }

@@ -4,5 +4,5 @@
 	"name": "wall",
 	"diffuse": "WornBrownBrickwork-ColorMap",
 	"normal": "WornBrownBrickwork-NormalMap",
-	"shader": "shader1",
+	"shader": "shader1"
 }
