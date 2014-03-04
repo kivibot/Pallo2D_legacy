@@ -5,6 +5,7 @@
  */
 package fi.kivibot.pallo.rendering;
 
+import fi.kivibot.pallo.scene.VertexBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import org.lwjgl.util.vector.Vector2f;

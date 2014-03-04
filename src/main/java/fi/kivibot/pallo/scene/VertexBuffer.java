@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package fi.kivibot.pallo.rendering;
+package fi.kivibot.pallo.scene;
 
+import fi.kivibot.pallo.rendering.GLObject;
 import java.nio.Buffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;

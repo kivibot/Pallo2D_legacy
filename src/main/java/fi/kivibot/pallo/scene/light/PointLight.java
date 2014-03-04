@@ -3,10 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package fi.kivibot.pallo.rendering.light;
+package fi.kivibot.pallo.scene.light;
 
-import fi.kivibot.pallo.rendering.Mesh;
-import fi.kivibot.pallo.rendering.VertexBuffer;
+import fi.kivibot.pallo.scene.Mesh;
+import fi.kivibot.pallo.scene.VertexBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import org.lwjgl.BufferUtils;

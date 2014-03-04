@@ -3,17 +3,18 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package fi.kivibot.pallo.rendering.light;
+package fi.kivibot.pallo.scene.light;
 
-import fi.kivibot.misc.Node;
-import fi.kivibot.pallo.rendering.Mesh;
+import fi.kivibot.pallo.scene.Node;
+import fi.kivibot.pallo.scene.Spatial;
+import fi.kivibot.pallo.scene.Mesh;
 import org.lwjgl.util.vector.Vector3f;
 
 /**
  *
  * @author kivi
  */
-public abstract class Light extends Node {
+public abstract class Light extends Spatial{
 
     public enum Type {
 

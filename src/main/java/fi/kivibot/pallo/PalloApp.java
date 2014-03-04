@@ -1,8 +1,8 @@
 package fi.kivibot.pallo;
 
-import fi.kivibot.engine.game.GameObject;
+import fi.kivibot.pallo.scene.GameObject;
 import fi.kivibot.misc.FPSCounter;
-import fi.kivibot.misc.Node;
+import fi.kivibot.pallo.scene.Node;
 import fi.kivibot.pallo.assets.AssetManager;
 import fi.kivibot.pallo.audio.AudioEngine;
 import fi.kivibot.pallo.rendering.Renderer;

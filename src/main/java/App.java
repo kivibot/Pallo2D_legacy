@@ -1,15 +1,15 @@
 
-import fi.kivibot.misc.Node;
+import fi.kivibot.pallo.scene.Node;
 import fi.kivibot.pallo.PalloApp;
 import fi.kivibot.pallo.assets.AssetManager;
 import fi.kivibot.pallo.audio.AudioListener;
 import fi.kivibot.pallo.audio.AudioSource;
-import fi.kivibot.pallo.rendering.light.PointLight;
+import fi.kivibot.pallo.scene.light.PointLight;
 import fi.kivibot.pallo.rendering.Material;
-import fi.kivibot.pallo.rendering.Mesh;
-import fi.kivibot.pallo.rendering.ParticleEmitter;
-import fi.kivibot.pallo.rendering.Spatial;
-import fi.kivibot.pallo.rendering.VertexBuffer;
+import fi.kivibot.pallo.scene.Mesh;
+import fi.kivibot.pallo.scene.ParticleEmitter;
+import fi.kivibot.pallo.scene.Geometry;
+import fi.kivibot.pallo.scene.VertexBuffer;
 import java.io.BufferedInputStream;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -33,7 +33,7 @@ public class App extends PalloApp {
         new App().start();
     }
 
-    private Spatial s;
+    private Geometry s;
     private Node n;
     private float x = 0, y = 0;
 
@@ -50,28 +50,28 @@ public class App extends PalloApp {
         ma.setSpecularColor(new Vector3f(1, 1, 1));
 
         //Mesh me = new Mesh(new float[]{x - 0.5f, y - 0.5f, x - 0.5f, y + 0.5f, x + 0.5f, y + 0.5f, x + 0.5f, y - 0.5f}, new int[]{0, 1, 2, 0, 2, 3}, new float[]{0, 1, 0, 0, 1, 0, 1, 1});
-        s = new Spatial(AssetManager.getMesh("mesh"), ma);
-        s.getTransform().setScale(800, 600);
+        s = new Geometry(AssetManager.getMesh("mesh"), ma);
+        s.setScale(800, 600);
 
         n = new Node();
-        n.addChild(s);
-        s.getTransform().translate(new Vector2f(0, 0));
+        n.addGeometry(s);
+        s.translate(new Vector2f(0, 0));
 
         rootNode.addChild(n);
 
         for (int i = 0; i < 0; i++) {
             l = new PointLight(new Vector3f((float) Math.random(), (float) Math.random(), (float) Math.random()));
-            l.getTransform().setLocalPosition(new Vector2f((float) (Math.random() * 2 - 1), (float) (Math.random() * 2 - 1)));
+            l.setLocalPosition(new Vector2f((float) (Math.random() * 2 - 1), (float) (Math.random() * 2 - 1)));
             l.setHeight(1);
             l.genMesh();
-            rootNode.addChild(l);
+            rootNode.addLight(l);
         }
 
         ln = new Node();
         rootNode.addChild(ln);
         /*
          l = new PointLight(new Vector3f(1, 1, 1));
-         l.getTransform().setLocalPosition(new Vector2f(0, 0));
+         l.setLocalPosition(new Vector2f(0, 0));
          l.genMesh();
          ln.addChild(l);
          */
@@ -83,28 +83,28 @@ public class App extends PalloApp {
             float c = (float) (Math.cos(a) * ra);
             //l = new PointLight(new Vector3f(0.68f / rc, 0.88f / rc, 1f / rc));
             l = new PointLight(new Vector3f(0.01f / rc, 0.8f / rc, 0.8f / rc));
-            l.getTransform().setLocalPosition(new Vector2f(c, s));
+            l.setLocalPosition(new Vector2f(c, s));
             l.setQuadraticAttenuation(l.getQuadraticAttenuation()/2f);
             l.setLinearAttenuation(0.001f);
             l.setRange(800);
             l.genMesh();
-            ln.addChild(l);
+            ln.addLight(l);
         }
 
         rootNode.addChild(new ParticleEmitter());
 
         al = new AudioListener(true);
 
-        rootNode.addChild(al);
+        rootNode.addAudioListener(al);
 
         this.getAudioEngine().setActiveListener(al);
         for (int i = 0; i < 1; i++) {
             AudioSource as = new AudioSource(WaveData.create(new BufferedInputStream(App.class.getResourceAsStream("assets/test3.wav"))));
 
-            as.getTransform().setLocalPosition(new Vector2f(i, 0f));
+            as.setLocalPosition(new Vector2f(i, 0f));
 
-//            as.play();
-            rootNode.addChild(as);
+            as.play();
+            rootNode.addAudioSource(as);
         }
 
         //rootNode.addChild(new PointLight(new Vector3f(1f, 0.675f, 0.380f)));
@@ -115,7 +115,7 @@ public class App extends PalloApp {
     @Override
     protected void Update(float delta) {
 
-        al.getTransform().setLocalPosition(new Vector2f((float) Math.cos(System.currentTimeMillis() / 1000.0) * 1.5f, (float) Math.sin(System.currentTimeMillis() / 1000.0) * 1.5f));
+        al.setLocalPosition(new Vector2f((float) Math.cos(System.currentTimeMillis() / 1000.0) * 1.5f, (float) Math.sin(System.currentTimeMillis() / 1000.0) * 1.5f));
 
         x = Mouse.getX() - 400f;
         y = Mouse.getY() - 300f;
@@ -150,8 +150,8 @@ public class App extends PalloApp {
             ic = 0;
             Mesh me = new Mesh();//new float[]{x, y, x, y + 0.05f, x + 0.05f, y + 0.05f, x + 0.05f, y}, new int[]{0, 1, 2, 0, 2, 3}, new float[]{0, 1, 0, 0, 1, 0, 1, 1});
 
-            s = new Spatial(me, s.getMaterial());
-            rootNode.addChild(s);
+            s = new Geometry(me, s.getMaterial());
+            rootNode.addGeometry(s);
 
             try {
                 Thread.sleep(500);
@@ -160,8 +160,8 @@ public class App extends PalloApp {
             }
         }
         if (Keyboard.isKeyDown(Keyboard.KEY_N)) {
-            ln.getTransform().setLocalPosition(new Vector2f(x, y));
-            System.out.println(ln.getTransform().getWorldPosition());
+            ln.setLocalPosition(new Vector2f(x, y));
+            System.out.println(ln.getWorldPosition());
         }
         if (Keyboard.isKeyDown(Keyboard.KEY_O)) {
             l.setHeight(l.getHeight() + 0.01f);
@@ -180,16 +180,16 @@ public class App extends PalloApp {
             System.out.println(s.getMaterial().getShininess());
         }
         if (Keyboard.isKeyDown(Keyboard.KEY_M)) {
-            //this.getRenderer().getAppCam().getTransform().setRotation((float) (System.currentTimeMillis() % 2000 * Math.PI / 1000f));
-            //s.getTransform().setRotation((float) (System.currentTimeMillis() % 2000 * Math.PI / 1000f));
-            ln.getParent().getTransform().setRotation((float) (System.currentTimeMillis() % 2000 * Math.PI / 1000f));
+            //this.getRenderer().getAppCam().setRotation((float) (System.currentTimeMillis() % 2000 * Math.PI / 1000f));
+            //s.setRotation((float) (System.currentTimeMillis() % 2000 * Math.PI / 1000f));
+            ln.getParent().setRotation((float) (System.currentTimeMillis() % 2000 * Math.PI / 1000f));
         }
         if (Keyboard.isKeyDown(Keyboard.KEY_UP)) {
-            s.getTransform().translate(new Vector2f(0, 0.01f));
-            System.out.println(s.getTransform().getWorldMatrix());
+            s.translate(new Vector2f(0, 0.01f));
+            System.out.println(s.getWorldMatrix());
         }
         if (Keyboard.isKeyDown(Keyboard.KEY_DOWN)) {
-            s.getTransform().translate(new Vector2f(0, -0.01f));
+            s.translate(new Vector2f(0, -0.01f));
         }
         if (Keyboard.isKeyDown(Keyboard.KEY_G)) {
             rootNode.addChild(new ParticleEmitter());
@@ -207,10 +207,10 @@ public class App extends PalloApp {
                 Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
             }
             l = new PointLight(new Vector3f((float) Math.random(), (float) Math.random(), (float) Math.random()));
-            l.getTransform().setLocalPosition(new Vector2f((float) (Math.random() * 2 - 1), (float) (Math.random() * 2 - 1)));
+            l.setLocalPosition(new Vector2f((float) (Math.random() * 2 - 1), (float) (Math.random() * 2 - 1)));
             l.setHeight(1);
             l.genMesh();
-            rootNode.addChild(l);
+            rootNode.addLight(l);
         }
     }
 }

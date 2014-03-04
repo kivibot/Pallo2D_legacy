@@ -3,15 +3,16 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package fi.kivibot.pallo.rendering;
+package fi.kivibot.pallo.scene;
 
-import fi.kivibot.misc.Node;
+import fi.kivibot.pallo.scene.Node;
+import fi.kivibot.pallo.scene.Spatial;
 
 /**
  *
  * @author kivi
  */
-public class Camera extends Node {
+public class Camera extends Spatial {
 
     private final int screen_width, screen_height;
     private final float ratio;
@@ -20,12 +21,12 @@ public class Camera extends Node {
         screen_width = sw;
         screen_height = sh;
         ratio = (float) sw / (float) sh;
-        this.getTransform().setScale(1, ratio);
+        this.setScale(1, ratio);
         this.setViewSize(sw, sh);
     }
 
     public final void setViewSize(int w, int h) {
-        this.getTransform().setScale((float) 2f / (float) w, 2f / (float) h);
+        this.setScale((float) 2f / (float) w, 2f / (float) h);
     }
 
 }

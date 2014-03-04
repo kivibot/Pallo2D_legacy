@@ -1,6 +1,6 @@
-package fi.kivibot.pallo.rendering.light;
+package fi.kivibot.pallo.scene.light;
 
-import fi.kivibot.pallo.rendering.VertexBuffer;
+import fi.kivibot.pallo.scene.VertexBuffer;
 import java.nio.FloatBuffer;
 import java.util.LinkedList;
 import java.util.List;
@@ -63,13 +63,13 @@ public class LightShadower implements RayCastCallback {
 
         FloatBuffer fb = BufferUtils.createFloatBuffer(2 * l.getRC() + 2);
 
-        Vec2 pos = new Vec2(l.getTransform().getWorldPosition().getX(), l.getTransform().getWorldPosition().getY());
+        Vec2 pos = new Vec2(l.getWorldPosition().getX(), l.getWorldPosition().getY());
         fb.put(new float[]{0, 0});
         for (int i = 0; i < l.getRC(); i++) {
             float a = (l.getFOL() / (float) (l.getRC() - 1)) * i;
             Vec2 ret = this.calcRay(pos, new Vec2((float) Math.cos(a), (float) Math.sin(a)).mul(l.getRange()));
             Vector3f cb = new Vector3f(), s = new Vector3f(ret.x, ret.y, 0);
-            Matrix3f.transform(l.getTransform().getLocalMatrix(), s, cb);
+            Matrix3f.transform(l.getLocalMatrix(), s, cb);
             fb.put(new float[]{ret.x, ret.y});
         }
         fb.flip();

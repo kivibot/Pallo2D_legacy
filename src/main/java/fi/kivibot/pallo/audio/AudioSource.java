@@ -5,7 +5,8 @@
  */
 package fi.kivibot.pallo.audio;
 
-import fi.kivibot.misc.Node;
+import fi.kivibot.pallo.scene.Node;
+import fi.kivibot.pallo.scene.Spatial;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import org.lwjgl.BufferUtils;
@@ -19,7 +20,7 @@ import org.lwjgl.util.vector.Vector3f;
  *
  * @author kivi
  */
-public class AudioSource extends Node {
+public class AudioSource extends Spatial {
 
     private FloatBuffer pos, vel;
     private int buffer, source;
@@ -44,7 +45,7 @@ public class AudioSource extends Node {
     }
 
     public FloatBuffer getPositionBuffer() {
-        Vector2f p = this.getTransform().getWorldPosition();
+        Vector2f p = this.getWorldPosition();
         pos.clear();
         pos.put(new float[]{p.x, p.y, 0});
         pos.rewind();

@@ -5,7 +5,7 @@
  */
 package fi.kivibot.pallo.audio;
 
-import fi.kivibot.misc.Node;
+import fi.kivibot.pallo.scene.Node;
 import java.util.LinkedList;
 import java.util.Queue;
 import org.lwjgl.openal.AL10;
@@ -18,10 +18,10 @@ public class AudioEngine {
 
     private AudioListener main;
 
-    public void setActiveListener(AudioListener al){
+    public void setActiveListener(AudioListener al) {
         main = al;
     }
-    
+
     public void updateTree(Node n) {
         Queue<Node> q = new LinkedList<>();
         q.add(n);
@@ -35,8 +35,8 @@ public class AudioEngine {
             for (Node no : cur.getChildren()) {
                 q.add(no);
             }
-            if (cur instanceof AudioSource) {
-                this.handleSource((AudioSource) cur);
+            for (AudioSource as : cur.getAudioSources()) {
+                this.handleSource(as);
             }
         }
     }
@@ -46,7 +46,7 @@ public class AudioEngine {
         AL10.alSource(as.getSourceID(), AL10.AL_VELOCITY, as.getVelocityBuffer());
         if (as.isStartRequested()) {
             AL10.alSourcePlay(as.getSourceID());
-        } else if(as.isStopRequested()){
+        } else if (as.isStopRequested()) {
             AL10.alSourceStop(as.getSourceID());
         }
         as.clearRequests();

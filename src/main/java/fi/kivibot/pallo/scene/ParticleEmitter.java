@@ -3,12 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package fi.kivibot.pallo.rendering;
+package fi.kivibot.pallo.scene;
 
-import fi.kivibot.engine.game.GameObject;
-import fi.kivibot.misc.Node;
-import fi.kivibot.pallo.rendering.light.PointLight;
-import fi.kivibot.pallo.rendering.light.PointLightArray;
+import fi.kivibot.pallo.scene.Node;
+import fi.kivibot.pallo.scene.light.PointLight;
+import fi.kivibot.pallo.scene.light.PointLightArray;
 import fi.kivibot.util.TimeUtils;
 import java.util.LinkedList;
 import java.util.List;
@@ -180,7 +179,8 @@ public class ParticleEmitter extends GameObject {
 
     @Override
     public boolean Init() {
-        this.addChild(pla);
+        this.addLight(pla);
+        this.addLight(pla);
         return true;
     }
 
@@ -202,9 +202,9 @@ public class ParticleEmitter extends GameObject {
             if (p.age > this.max_age) {
                 tbr.add(p);
             } else {
-                p.getTransform().translate(p.velo);
+                p.translate(p.velo);
 
-                Vector2f asdf = p.getTransform().getLocalPosition();
+                Vector2f asdf = p.getLocalPosition();
 
                 pla.setPosition(ind, new Vector3f(asdf.x, asdf.y, this.height));
 
@@ -234,7 +234,7 @@ public class ParticleEmitter extends GameObject {
                 toadd--;
                 Particle p = buffer.poll();
                 p.age = 0;
-                p.getTransform().setLocalPosition(new Vector2f(ep.x, ep.y));
+                p.setLocalPosition(new Vector2f(ep.x, ep.y));
                 float vel = (float) ((this.max_speed - this.min_speed) * Math.random() + this.min_speed);
                 float a = this.angle + (float) (Math.random() - 0.5) * this.fos;
                 p.velo.x = (float) (Math.cos(a) * vel);

@@ -3,34 +3,41 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package fi.kivibot.math;
+package fi.kivibot.pallo.scene;
 
-import org.lwjgl.util.vector.Matrix2f;
 import org.lwjgl.util.vector.Matrix3f;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
 /**
+ * Not thread safe!
  *
  * @author kivi
  */
-public class Transform {
+public class Spatial {
 
-    private Vector2f pos, sca = new Vector2f(1, 1);
+    private Spatial parent;
+    private Vector2f pos = new Vector2f(0, 0), sca = new Vector2f(1, 1);
     private float rot = 0;
 
     private Matrix3f mat = new Matrix3f();
 
-    private Transform parent;
-    
     //Memory allocation optimization
     private Matrix3f ret = new Matrix3f();
 
-    public Transform(Vector2f p) {
-        pos = p;
+    public Spatial() {
         mat.m22 = 1;
         mat.m00 = 1; //cos 0
         mat.m11 = 1; //cos 0
+        System.out.println("spatial");
+    }
+
+    public void setParent(Spatial s) {
+        parent = s;
+    }
+
+    public Spatial getParent() {
+        return this.parent;
     }
 
     public Vector2f getLocalPosition() {
@@ -75,10 +82,6 @@ public class Transform {
             ret = this.getLocalMatrix();
         }
         return ret;
-    }
-
-    public void setParent(Transform t) {
-        parent = t;
     }
 
     public void setRotation(float r) {

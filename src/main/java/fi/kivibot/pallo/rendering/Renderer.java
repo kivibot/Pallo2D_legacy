@@ -5,15 +5,20 @@
  */
 package fi.kivibot.pallo.rendering;
 
+import fi.kivibot.pallo.scene.Camera;
+import fi.kivibot.pallo.scene.Mesh;
+import fi.kivibot.pallo.scene.VertexBuffer;
+import fi.kivibot.pallo.scene.Geometry;
 import fi.kivibot.math.Rect;
-import fi.kivibot.misc.Node;
+import fi.kivibot.pallo.scene.Node;
 import fi.kivibot.pallo.assets.AssetManager;
-import fi.kivibot.pallo.rendering.VertexBuffer.Usage;
-import fi.kivibot.pallo.rendering.light.DirectionalLight;
-import fi.kivibot.pallo.rendering.light.Light;
-import fi.kivibot.pallo.rendering.light.LightShadower;
-import fi.kivibot.pallo.rendering.light.PointLight;
-import fi.kivibot.pallo.rendering.light.PointLightArray;
+import fi.kivibot.pallo.scene.VertexBuffer.Usage;
+import fi.kivibot.pallo.scene.light.DirectionalLight;
+import fi.kivibot.pallo.scene.light.Light;
+import fi.kivibot.pallo.scene.light.LightShadower;
+import fi.kivibot.pallo.scene.light.PointLight;
+import fi.kivibot.pallo.scene.light.PointLightArray;
+import fi.kivibot.pallo.scene.light.ShadowCaster;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -49,7 +54,7 @@ public class Renderer {
 
     private Rect screenBounds = new Rect(-10.75f, -10.75f, 111.5f, 111.5f);
     private int objc;
-    private Spatial screen, screen2;
+    private Geometry screen, screen2;
     private Shader pass1_point_shader, pass1_directional_shader, pass1_ambient_shader, pass1_array_shader, pass2_shader;
 
     private FBO pass0_fbo;
@@ -94,8 +99,8 @@ public class Renderer {
         Material ma = new Material("renderer_screen", Texture.DEFAULT, AssetManager.getShader("shader0"));
         Material ma2 = new Material("renderer_screen", Texture.DEFAULT, AssetManager.getShader("light_preview"));
 
-        this.screen = new Spatial(m, ma);
-        this.screen2 = new Spatial(m, ma2);
+        this.screen = new Geometry(m, ma);
+        this.screen2 = new Geometry(m, ma2);
 
         pass1_point_shader = AssetManager.getShader("pass1_point");
         pass1_directional_shader = AssetManager.getShader("pass1_directional");
@@ -120,25 +125,30 @@ public class Renderer {
 
         objc = 0;
 
-        List<Node> no = new LinkedList<>();
-        List<Light> li = new LinkedList<>();
+        List<Geometry> geometries = new LinkedList<>();
+        List<Light> lights = new LinkedList<>();
+        List<ShadowCaster> shadowCasters = new LinkedList<>();
         Queue<Node> q = new LinkedList<>();
         q.add(n_);
         Node c;
         while ((c = q.poll()) != null) {
-            if (c instanceof Light) {
-                li.add((Light) c);
-            } else {
-                no.add(c);
+            for(Light l : c.getLights()){
+                lights.add(l);
+            }
+            for(Geometry g : c.getGeometries()){
+                geometries.add(g);
+            }
+            for(ShadowCaster sc : c.getShadowCasters()){
+                shadowCasters.add(sc);
             }
             for (Node n : c.getChildren()) {
                 q.add(n);
             }
         }
-        renderLists(no, li);
+        renderLists(geometries, lights);
     }
 
-    private void renderLists(List<Node> list, List<Light> lights) {
+    private void renderLists(List<Geometry> list, List<Light> lights) {
 
         GL11.glDisable(GL11.GL_BLEND);
 
@@ -157,8 +167,8 @@ public class Renderer {
 
         this.matList.clear();
 
-        for (Node n : list) {
-            renderNodePass0(n);
+        for (Geometry n : list) {
+            renderGeometryPass0(n);
         }
 
         this.bindFBO(FBO.DEFAULT);
@@ -224,12 +234,6 @@ public class Renderer {
 
     }
 
-    private void renderNodePass0(Node n) {
-        if (n instanceof Spatial) {
-            renderSpatialPass0((Spatial) n);
-        }
-    }
-
     private void renderPass1(Light l, FloatBuffer md) {
         //BINDING
 
@@ -265,14 +269,14 @@ public class Renderer {
             case POINT:
                 FloatBuffer ld = (FloatBuffer) this.matbufs[0].clear();
                 Vector3f col = l.getColor();
-                Vector2f pos = l.getTransform().getWorldPosition();
+                Vector2f pos = l.getWorldPosition();
                 ld.put(new float[]{col.x, col.y, col.z, pos.x, pos.y, ((PointLight) l).getHeight(), col.x, col.y, col.z});
                 ld.flip();
                 GL20.glUniform1(GL20.glGetUniformLocation(s.getID(), "li"), ld);
                 GL20.glUniform1(GL20.glGetUniformLocation(s.getID(), "mat"), md);
                 FloatBuffer mat0b = (FloatBuffer) this.matbufs[0].clear();
-                Matrix3f ma0 = l.getTransform().getWorldMatrix();
-                Vector2f sc = l.getTransform().getScale();
+                Matrix3f ma0 = l.getWorldMatrix();
+                Vector2f sc = l.getScale();
                 ma0.m10 = 0;
                 ma0.m01 = 0;
                 ma0.m00 = sc.x; //cos 0
@@ -280,7 +284,7 @@ public class Renderer {
                 ma0.store(mat0b);
                 mat0b.flip();
                 FloatBuffer matcb = (FloatBuffer) this.matbufs[1].clear();
-                this.main_cam.getTransform().getWorldMatrix().store(matcb);
+                this.main_cam.getWorldMatrix().store(matcb);
                 matcb.flip();
                 GL20.glUniformMatrix3(GL20.glGetUniformLocation(s.getID(), "mat0"), false, mat0b);
                 GL20.glUniformMatrix3(GL20.glGetUniformLocation(s.getID(), "matc"), false, matcb);
@@ -294,7 +298,7 @@ public class Renderer {
                 Vector3f dir = ((DirectionalLight) l).getDirection(),
                  a = new Vector3f(),
                  b = new Vector3f(dir.x, dir.y, 0);
-                Matrix3f.transform(l.getTransform().getWorldMatrix(), b, a);
+                Matrix3f.transform(l.getWorldMatrix(), b, a);
                 a.z = dir.z;
                 ld.put(new float[]{col.x, col.y, col.z, a.x, a.y, a.z, col.x, col.y, col.z});
                 ld.flip();
@@ -310,8 +314,8 @@ public class Renderer {
             case ARRAY:
                 ((PointLightArray) l).update();
                 mat0b = (FloatBuffer) this.matbufs[0].clear();
-                ma0 = l.getTransform().getWorldMatrix();
-                sc = l.getTransform().getScale();
+                ma0 = l.getWorldMatrix();
+                sc = l.getScale();
                 ma0.m10 = 0;
                 ma0.m01 = 0;
                 ma0.m00 = sc.x; //cos 0
@@ -319,7 +323,7 @@ public class Renderer {
                 ma0.store(mat0b);
                 mat0b.flip();
                 matcb = (FloatBuffer) this.matbufs[1].clear();
-                this.main_cam.getTransform().getWorldMatrix().store(matcb);
+                this.main_cam.getWorldMatrix().store(matcb);
                 matcb.flip();
                 GL20.glUniformMatrix3(GL20.glGetUniformLocation(s.getID(), "mat0"), false, mat0b);
                 GL20.glUniformMatrix3(GL20.glGetUniformLocation(s.getID(), "matc"), false, matcb);
@@ -338,7 +342,7 @@ public class Renderer {
 
     }
 
-    private void renderSpatialPass0(Spatial s) {
+    private void renderGeometryPass0(Geometry s) {
 
         Material mat = s.getMaterial();
         Mesh mesh = s.getMesh();
@@ -381,10 +385,10 @@ public class Renderer {
         GL20.glUniform1i(GL20.glGetUniformLocation(pass0.getID(), "matID"), id);
 
         FloatBuffer mat0b = (FloatBuffer) this.matbufs[0].clear();
-        s.getTransform().getWorldMatrix().store(mat0b);
+        s.getWorldMatrix().store(mat0b);
         mat0b.flip();
         FloatBuffer matcb = (FloatBuffer) this.matbufs[1].clear();
-        this.main_cam.getTransform().getWorldMatrix().store(matcb);
+        this.main_cam.getWorldMatrix().store(matcb);
         matcb.flip();
 
         GL20.glUniformMatrix3(GL20.glGetUniformLocation(pass0.getID(), "mat0"), false, mat0b);
@@ -392,8 +396,8 @@ public class Renderer {
 
         Vector3f ta = new Vector3f(), bita = new Vector3f();
 
-        Matrix3f.transform(s.getTransform().getWorldMatrix(), new Vector3f(1, 0, 0), ta);
-        Matrix3f.transform(s.getTransform().getWorldMatrix(), new Vector3f(0, 1, 0), bita);
+        Matrix3f.transform(s.getWorldMatrix(), new Vector3f(1, 0, 0), ta);
+        Matrix3f.transform(s.getWorldMatrix(), new Vector3f(0, 1, 0), bita);
 
         float talen = (float) Math.sqrt(Math.pow(ta.x, 2) + Math.pow(ta.y, 2));
         float bitalen = (float) Math.sqrt(Math.pow(bita.x, 2) + Math.pow(bita.y, 2));

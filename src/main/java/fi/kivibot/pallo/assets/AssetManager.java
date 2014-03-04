@@ -6,11 +6,11 @@
 package fi.kivibot.pallo.assets;
 
 import fi.kivibot.pallo.rendering.Material;
-import fi.kivibot.pallo.rendering.Mesh;
+import fi.kivibot.pallo.scene.Mesh;
 import fi.kivibot.pallo.rendering.Shader;
-import fi.kivibot.pallo.rendering.Spatial;
+import fi.kivibot.pallo.scene.Geometry;
 import fi.kivibot.pallo.rendering.Texture;
-import fi.kivibot.pallo.rendering.VertexBuffer;
+import fi.kivibot.pallo.scene.VertexBuffer;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
@@ -111,13 +111,13 @@ public class AssetManager {
         }
     }
 
-    public static Spatial getSpatial(String mekey, String makey) {
+    public static Geometry getSpatial(String mekey, String makey) {
         Material ma = AssetManager.getMaterial(makey);
         Mesh me = AssetManager.getMesh(mekey);
-        return new Spatial(me, ma);
+        return new Geometry(me, ma);
     }
 
-    public static Spatial getSpatial(String key) {
+    public static Geometry getSpatial(String key) {
         return getSpatial(key, key);
     }
 
