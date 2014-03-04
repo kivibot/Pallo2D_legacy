@@ -7,6 +7,7 @@ package fi.kivibot.pallo.scene.light;
 
 import fi.kivibot.pallo.scene.Node;
 import fi.kivibot.pallo.scene.Spatial;
+import org.jbox2d.collision.shapes.Shape;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.FixtureDef;
 
@@ -17,16 +18,22 @@ import org.jbox2d.dynamics.FixtureDef;
 public class ShadowCaster extends Spatial {
 
     private Body b;
-    private FixtureDef fd;
+    private Shape s;
 
-    public ShadowCaster(FixtureDef b) {
-        fd = b;
+    public ShadowCaster(Shape s) {
+        this.s = s;
     }
-    
-    public Body getBody(){
+
+    public Body getBody() {
         return b;
     }
-
     
+    public Shape getShape(){
+        return s;
+    }
+    
+    public void setBody(Body b){
+        this.b = b;
+    }
 
 }

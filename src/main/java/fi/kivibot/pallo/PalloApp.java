@@ -138,7 +138,7 @@ public abstract class PalloApp {
     }
 
     private void handleAudio() {
-        audio.updateTree(rootNode);
+        audio.updateTree(rootNode, this.gameSpeedFactor);
     }
 
     private void cleanUp() {
@@ -149,6 +149,10 @@ public abstract class PalloApp {
         long delta = curTime - oldTime;
         oldTime = curTime;
         return delta / 1000f;
+    }
+    
+    protected void setSpeedFactor(float f){
+        this.gameSpeedFactor = f;
     }
 
 }

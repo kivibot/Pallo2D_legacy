@@ -1,14 +1,6 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package fi.kivibot.pallo.scene;
 
-import fi.kivibot.pallo.scene.Node;
-import fi.kivibot.pallo.scene.light.PointLight;
 import fi.kivibot.pallo.scene.light.PointLightArray;
-import fi.kivibot.util.TimeUtils;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -25,9 +17,11 @@ public class ParticleEmitter extends GameObject {
 
         public float age;
         public Vector2f velo;
+        public Vector2f start;
 
-        public Particle(Vector2f v) {
+        public Particle(Vector2f v, Vector2f s) {
             velo = v;
+            this.start = s;
         }
     }
 
@@ -53,7 +47,7 @@ public class ParticleEmitter extends GameObject {
     private PointLightArray pla = new PointLightArray();
 
     public ParticleEmitter() {
-        this(300, 0.7f, 300, 10, 5, new Vector2f(0, 7), (float) Math.PI / 2, (float) -Math.PI / 3 * 2, -1.0f, 1.5f, new Vector3f(1f, 0.5f, 0.1f), new Vector3f(0.3f, -0.0f, 0f));
+        this(300, 0.7f, 300, 10, 5, new Vector2f(0, 700), (float) Math.PI / 2, (float) -Math.PI / 3 * 2, -100.0f, 100.5f, new Vector3f(1f, 0.5f, 0.1f), new Vector3f(0.3f, -0.0f, 0f));
     }
 
     public ParticleEmitter(int mc, float ma, float es, float ss, float se, Vector2f g, float a, float f, float mis, float mas, Vector3f cs, Vector3f ce) {
@@ -186,11 +180,10 @@ public class ParticleEmitter extends GameObject {
 
     @Override
     public boolean Update(float delta) {
-        if (delta > 0.02) {
-            System.out.println(delta);
-        }
+        System.out.println(delta);
+
         for (int i = 0; i < this.max_count - (buffer.size() + particles.size()); i++) {
-            Particle p = new Particle(new Vector2f());
+            Particle p = new Particle(new Vector2f(),new Vector2f());
             buffer.add(p);
         }
 
@@ -202,7 +195,17 @@ public class ParticleEmitter extends GameObject {
             if (p.age > this.max_age) {
                 tbr.add(p);
             } else {
-                p.translate(p.velo);
+                Vector2f tt = new Vector2f();
+                /*
+                 a = kiihtyvyys
+                 b = alkunopeus
+                 x = aika
+                 nopeus = ax+b
+                 matka = (a*x^2)/2+b*x+alkumatka
+                 */
+                tt.x = (float) (this.gravity.x * Math.pow(p.age, 2) / 2f + p.velo.x * p.age + p.start.x);
+                tt.y = (float) (this.gravity.y * Math.pow(p.age, 2) / 2f + p.velo.y * p.age + p.start.y);
+                p.setLocalPosition(tt);
 
                 Vector2f asdf = p.getLocalPosition();
 
@@ -216,8 +219,8 @@ public class ParticleEmitter extends GameObject {
                 float cg = (this.color_e.y * (float) p.age + this.color_s.y * (float) (this.max_age - p.age)) / (float) this.max_age;
                 float cb = (this.color_e.z * (float) p.age + this.color_s.z * (float) (this.max_age - p.age)) / (float) this.max_age;
                 pla.setColor(ind, new Vector3f(cr, cg, cb));
-                p.velo.x += gravity.x * delta;
-                p.velo.y += gravity.y * delta;
+                //p.velo.x += gravity.x * delta;
+                //p.velo.y += gravity.y * delta;
 
             }
         }
@@ -239,6 +242,8 @@ public class ParticleEmitter extends GameObject {
                 float a = this.angle + (float) (Math.random() - 0.5) * this.fos;
                 p.velo.x = (float) (Math.cos(a) * vel);
                 p.velo.y = (float) (Math.sin(a) * vel);
+                p.start.x = this.ep.x;
+                p.start.y = this.ep.y;
 
                 pla.addLight(color_s, new Vector3f(ep.x, ep.y, this.height), this.size_s);
                 particles.add(p);

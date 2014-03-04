@@ -22,7 +22,7 @@ public class AudioEngine {
         main = al;
     }
 
-    public void updateTree(Node n) {
+    public void updateTree(Node n, float factor) {
         Queue<Node> q = new LinkedList<>();
         q.add(n);
         if (main != null) {
@@ -36,14 +36,15 @@ public class AudioEngine {
                 q.add(no);
             }
             for (AudioSource as : cur.getAudioSources()) {
-                this.handleSource(as);
+                this.handleSource(as, factor);
             }
         }
     }
 
-    private void handleSource(AudioSource as) {
+    private void handleSource(AudioSource as, float factor) {
         AL10.alSource(as.getSourceID(), AL10.AL_POSITION, as.getPositionBuffer());
         AL10.alSource(as.getSourceID(), AL10.AL_VELOCITY, as.getVelocityBuffer());
+        AL10.alSourcef(as.getSourceID(), AL10.AL_PITCH, factor);
         if (as.isStartRequested()) {
             AL10.alSourcePlay(as.getSourceID());
         } else if (as.isStopRequested()) {

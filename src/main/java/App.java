@@ -10,11 +10,13 @@ import fi.kivibot.pallo.scene.Mesh;
 import fi.kivibot.pallo.scene.ParticleEmitter;
 import fi.kivibot.pallo.scene.Geometry;
 import fi.kivibot.pallo.scene.VertexBuffer;
+import fi.kivibot.pallo.scene.light.ShadowCaster;
 import java.io.BufferedInputStream;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.jbox2d.collision.shapes.PolygonShape;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
@@ -110,6 +112,10 @@ public class App extends PalloApp {
         //rootNode.addChild(new PointLight(new Vector3f(1f, 0.675f, 0.380f)));
 
         //rootNode.addChild(new AmbientLight(new Vector3f(0.1f, 0.3f, 0.1f)));
+        
+        PolygonShape s = new PolygonShape();
+        s.setAsBox(50, 50);
+        rootNode.addShadowCaster(new ShadowCaster(s));
     }
 
     @Override
@@ -164,11 +170,11 @@ public class App extends PalloApp {
             System.out.println(ln.getWorldPosition());
         }
         if (Keyboard.isKeyDown(Keyboard.KEY_O)) {
-            l.setHeight(l.getHeight() + 0.01f);
+            l.setHeight(l.getHeight() + 1f);
             System.out.println(l.getHeight());
         }
         if (Keyboard.isKeyDown(Keyboard.KEY_I)) {
-            l.setHeight(l.getHeight() - 0.01f);
+            l.setHeight(l.getHeight() - 1f);
             System.out.println(l.getHeight());
         }
         if (Keyboard.isKeyDown(Keyboard.KEY_K)) {
@@ -199,6 +205,11 @@ public class App extends PalloApp {
         }
         if (Keyboard.isKeyDown(Keyboard.KEY_NUMPAD5)) {
             GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
+        }
+        if (Keyboard.isKeyDown(Keyboard.KEY_NUMPAD6)) {
+            this.setSpeedFactor(0.25f);
+        }else{
+            this.setSpeedFactor(1);
         }
         if (Keyboard.isKeyDown(Keyboard.KEY_H)) {
             try {

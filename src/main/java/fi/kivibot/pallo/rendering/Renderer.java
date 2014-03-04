@@ -145,6 +145,7 @@ public class Renderer {
                 q.add(n);
             }
         }
+        ls.updateShadowCasters(shadowCasters);
         renderLists(geometries, lights);
     }
 
