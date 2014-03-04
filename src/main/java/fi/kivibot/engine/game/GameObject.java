@@ -25,6 +25,6 @@ public abstract class GameObject extends Node {
 
     public abstract boolean Init();
 
-    public abstract boolean Update();
+    public abstract boolean Update(float delta);
 
 }

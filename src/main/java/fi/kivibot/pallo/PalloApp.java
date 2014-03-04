@@ -6,6 +6,7 @@ import fi.kivibot.misc.Node;
 import fi.kivibot.pallo.assets.AssetManager;
 import fi.kivibot.pallo.audio.AudioEngine;
 import fi.kivibot.pallo.rendering.Renderer;
+import fi.kivibot.util.TimeUtils;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.logging.Level;
@@ -26,9 +27,12 @@ public abstract class PalloApp {
 
     private boolean running = true;
     private int frame_rate = 60;
+    private float gameSpeedFactor = 1;
     private FPSCounter fps = new FPSCounter(frame_rate);
     private Renderer renderer;
     private AudioEngine audio;
+
+    private long oldTime;
 
     protected Node rootNode = new Node();
 
@@ -42,7 +46,7 @@ public abstract class PalloApp {
 
     protected abstract void Init();
 
-    protected abstract void Update();
+    protected abstract void Update(float delta);
 
     public void start() {
         initDisplay(800, 600);
@@ -50,6 +54,7 @@ public abstract class PalloApp {
         initOAL();
         this.renderer = new Renderer(800, 600);
         Init();
+        oldTime = TimeUtils.getTime();
         do {
             fps.update();
             Display.setTitle("FPS: " + (int) fps.getFrameRate() + " ("
@@ -90,9 +95,10 @@ public abstract class PalloApp {
     }
 
     private boolean loop() {
+        float d = this.deltaTime() * this.gameSpeedFactor;
         handleEvents();
-        this.handleGameLogic();
-        this.Update();
+        this.handleGameLogic(d);
+        this.Update(d);
         handleRendering();
         handleAudio();
         Display.update();
@@ -108,7 +114,7 @@ public abstract class PalloApp {
         }
     }
 
-    private void handleGameLogic() {
+    private void handleGameLogic(float delta) {
         Queue<Node> q = new LinkedList<>();
         q.add(rootNode);
         Node c;
@@ -118,7 +124,7 @@ public abstract class PalloApp {
             }
             if (c instanceof GameObject) {
                 if (((GameObject) c).isInitialized()) {
-                    ((GameObject) c).Update();
+                    ((GameObject) c).Update(delta);
                 } else {
                     ((GameObject) c).Init();
                     ((GameObject) c).setAsInitialized();
@@ -136,6 +142,13 @@ public abstract class PalloApp {
     }
 
     private void cleanUp() {
+    }
+
+    private float deltaTime() {
+        long curTime = TimeUtils.getTime();
+        long delta = curTime - oldTime;
+        oldTime = curTime;
+        return delta / 1000f;
     }
 
 }

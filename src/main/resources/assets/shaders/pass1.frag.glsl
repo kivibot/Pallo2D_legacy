@@ -5,7 +5,7 @@ const int matcount = 20;
 
 const int lightsize = 3+3+3;
 
-uniform sampler2D samp[3];
+uniform sampler2D samp[4];
 
 uniform vec2 screen;
 uniform float mat[matcount*matsize];      
@@ -32,10 +32,12 @@ void main(void) {
 	
 	vec3 mp = texture(samp[1], pass_Texcoord).xyz;
 	
-	vec3 mn = normalize(texture(samp[2], pass_Texcoord)).xyz;
-	vec3 cp = vec3(0,0,0); //Cam Pos
+	vec3 mn = texture(samp[2], pass_Texcoord).xyz;
+	vec3 cp = vec3(0.0,0.0,70.0); //Cam Pos
+
+        vec3 tex3 = texture(samp[3], pass_Texcoord).xyz;
 	
-	int mid = 0;//int(mp.w);
+	int mid = int(tex3.x);
 
 	int moff = mid*matsize;
 	
@@ -63,18 +65,28 @@ void main(void) {
 	#endif
 	
 	#ifdef POINT
-		vec3 ltm = lpos-mp;
+		vec3 surface_to_light = lpos-mp;
 	
-		float d = length(ltm);
+		float d = length(surface_to_light);
 	
 		float a = clamp(1.0 / ((d*attenuationLinear + pow(d,2)*attenuationSquare)+attenuationConst),0.0,1.0);
 	
-		ltm /= d;
-		
-		vec3 hv = normalize(ltm+cp-mp);
+		surface_to_light /= d;
+                
+                vec3 rv = -reflect(surface_to_light,mn);
 
-		out_Color = a * (max(0,dot(mn,ltm))* lcol * dif + lspe * mat_0 * pow(max(0.0, dot(hv,mn)), mat_shi) * 1.0);//dif.w);
-	#endif
+                vec3 specular = vec3(0,0,0);
+
+                //might be very costly
+                if(dot(surface_to_light,mn) >= 0.0){
+                    specular = lspe * mat_0 * pow(max(0.0, dot(rv,normalize(cp-mp))),mat_shi) * tex3.y;
+                }
+
+
+                out_Color = a * (max(0,dot(mn,surface_to_light))* lcol * dif + specular);
+                //out_Color = vec3(dot(rv,normalize(cp-mp)),0,0);        
+
+        #endif
 	#ifdef DIRECTIONAL
 		ldir = normalize(-ldir);
 		vec3 hv = normalize(ldir+cp-mp);
@@ -85,17 +97,25 @@ void main(void) {
 		out_Color = lcol * dif;
 	#endif
 	#ifdef ARRAY
-		vec3 ltm = lpos-mp;
+		vec3 surface_to_light = lpos-mp;
 	
-		float d = length(ltm);
+		float d = length(surface_to_light);
 	
 		float a = clamp(1.0 / ((d*0 + pow(d,2)*0.0001)),0.0,1.0);
 	
-		ltm /= d;
+		surface_to_light /= d;
 		
-		vec3 hv = normalize(ltm+cp-mp);
+		vec3 rv = -reflect(surface_to_light,mn);
 
-		out_Color = a * (max(0,dot(mn,ltm))* lcol * dif + lspe * mat_0 * pow(max(0.0, dot(hv,mn)), mat_shi) * 1.0);//dif.w);
-		//out_Color = lpos;
+                vec3 specular = vec3(0,0,0);
+
+                //might be very costly
+                if(dot(surface_to_light,mn) >= 0.0){
+                    specular = lspe * mat_0 * pow(max(0.0, dot(rv,normalize(cp-mp))),mat_shi) * tex3.y;
+                }
+
+
+                out_Color = a * (max(0,dot(mn,surface_to_light))* lcol * dif + specular);
+                //out_Color = lpos;
 	#endif
 }

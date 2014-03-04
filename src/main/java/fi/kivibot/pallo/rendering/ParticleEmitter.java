@@ -24,7 +24,7 @@ public class ParticleEmitter extends GameObject {
 
     private class Particle extends Node {
 
-        public int age;
+        public float age;
         public Vector2f velo;
 
         public Particle(Vector2f v) {
@@ -33,7 +33,7 @@ public class ParticleEmitter extends GameObject {
     }
 
     private int max_count;
-    private int max_age;
+    private float max_age;
     private float emit_speed;
     private float size_s;
     private float size_e;
@@ -54,10 +54,10 @@ public class ParticleEmitter extends GameObject {
     private PointLightArray pla = new PointLightArray();
 
     public ParticleEmitter() {
-        this(300, 700, 300, 10, 5, new Vector2f(0, 7), (float) Math.PI / 2, (float) -Math.PI / 3 * 2, -1.0f, 1.5f, new Vector3f(1f, 0.5f, 0.1f), new Vector3f(0.3f, -0.0f, 0f));
+        this(300, 0.7f, 300, 10, 5, new Vector2f(0, 7), (float) Math.PI / 2, (float) -Math.PI / 3 * 2, -1.0f, 1.5f, new Vector3f(1f, 0.5f, 0.1f), new Vector3f(0.3f, -0.0f, 0f));
     }
 
-    public ParticleEmitter(int mc, int ma, float es, float ss, float se, Vector2f g, float a, float f, float mis, float mas, Vector3f cs, Vector3f ce) {
+    public ParticleEmitter(int mc, float ma, float es, float ss, float se, Vector2f g, float a, float f, float mis, float mas, Vector3f cs, Vector3f ce) {
         this.max_count = mc;
         this.max_age = ma;
         this.emit_speed = es;
@@ -84,7 +84,7 @@ public class ParticleEmitter extends GameObject {
         this.max_age = a;
     }
 
-    public int getMaximumAge() {
+    public float getMaximumAge() {
         return this.max_age;
     }
 
@@ -176,32 +176,29 @@ public class ParticleEmitter extends GameObject {
         return this.ep;
     }
 
-    private long last_time;
     private float toadd;
 
     @Override
     public boolean Init() {
-        last_time = TimeUtils.getTime();
         this.addChild(pla);
         return true;
     }
 
     @Override
-    public boolean Update() {
+    public boolean Update(float delta) {
+        if (delta > 0.02) {
+            System.out.println(delta);
+        }
         for (int i = 0; i < this.max_count - (buffer.size() + particles.size()); i++) {
             Particle p = new Particle(new Vector2f());
             buffer.add(p);
         }
 
-        long cur_time = TimeUtils.getTime();
-        int passed = (int) (cur_time - last_time);
-        float step = passed / 1000f;
-        this.last_time = cur_time;
         List<Particle> tbr = new LinkedList<>();
         int ind = -1;
         for (Particle p : particles) {
             ind++;
-            p.age += passed;
+            p.age += delta;
             if (p.age > this.max_age) {
                 tbr.add(p);
             } else {
@@ -219,8 +216,8 @@ public class ParticleEmitter extends GameObject {
                 float cg = (this.color_e.y * (float) p.age + this.color_s.y * (float) (this.max_age - p.age)) / (float) this.max_age;
                 float cb = (this.color_e.z * (float) p.age + this.color_s.z * (float) (this.max_age - p.age)) / (float) this.max_age;
                 pla.setColor(ind, new Vector3f(cr, cg, cb));
-                p.velo.x += gravity.x * step;
-                p.velo.y += gravity.y * step;
+                p.velo.x += gravity.x * delta;
+                p.velo.y += gravity.y * delta;
 
             }
         }
@@ -232,7 +229,7 @@ public class ParticleEmitter extends GameObject {
         if (particles.size() >= this.max_count) {
             this.toadd = 0;
         } else {
-            toadd += this.emit_speed * step;
+            toadd += this.emit_speed * delta;
             for (int i = 0; i < Math.floor(toadd) && !buffer.isEmpty(); i++) {
                 toadd--;
                 Particle p = buffer.poll();

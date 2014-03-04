@@ -69,8 +69,8 @@ public class Renderer {
 
         main_cam = new Camera(w, h);
 
-        IntBuffer pass0_trgs = BufferUtils.createIntBuffer(3);
-        pass0_trgs.put(new int[]{GL30.GL_COLOR_ATTACHMENT0, GL30.GL_COLOR_ATTACHMENT1, GL30.GL_COLOR_ATTACHMENT2});
+        IntBuffer pass0_trgs = BufferUtils.createIntBuffer(4);
+        pass0_trgs.put(new int[]{GL30.GL_COLOR_ATTACHMENT0, GL30.GL_COLOR_ATTACHMENT1, GL30.GL_COLOR_ATTACHMENT2, GL30.GL_COLOR_ATTACHMENT3});
         pass0_trgs.flip();
         pass0_fbo.getTargetBuffer().setData(pass0_trgs);
 
@@ -90,8 +90,7 @@ public class Renderer {
         VertexBuffer vb2 = new VertexBuffer(VertexBuffer.Type.Index, VertexBuffer.Usage.Dynamic, VertexBuffer.Format.Integer);
         vb2.setData(ib0);
         Mesh m = new Mesh(vb0, vb1, vb2);
-        Mesh m2 = m;//= new Mesh(new float[]{-1, -1, -1, 1, 1, 1, 1, -1}, new int[]{0, 1, 2, 0, 2, 3}, new float[]{0, 1, 0, 0, 1, 0, 1, 1});
-
+        
         Material ma = new Material("renderer_screen", Texture.DEFAULT, AssetManager.getShader("shader0"));
         Material ma2 = new Material("renderer_screen", Texture.DEFAULT, AssetManager.getShader("light_preview"));
 
@@ -181,6 +180,7 @@ public class Renderer {
             this.bindTexture(pass0_fbo.getTextureList().get(0), GL13.GL_TEXTURE0);
             this.bindTexture(pass0_fbo.getTextureList().get(1), GL13.GL_TEXTURE1);
             this.bindTexture(pass0_fbo.getTextureList().get(2), GL13.GL_TEXTURE2);
+            this.bindTexture(pass0_fbo.getTextureList().get(3), GL13.GL_TEXTURE3);
 
             int shader_max_materials = 200;
 

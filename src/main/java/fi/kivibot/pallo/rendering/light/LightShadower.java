@@ -34,7 +34,7 @@ public class LightShadower implements RayCastCallback {
         sd.setAsBox(25, 25);
         fd.shape = sd;
 
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 0; i++) {
             for (int j = 0; j < 5; j++) {
 
                 BodyDef bd = new BodyDef();

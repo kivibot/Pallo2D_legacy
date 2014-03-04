@@ -107,13 +107,13 @@ public class App extends PalloApp {
             rootNode.addChild(as);
         }
 
-        rootNode.addChild(new PointLight(new Vector3f(1f, 0.675f, 0.380f)));
+        //rootNode.addChild(new PointLight(new Vector3f(1f, 0.675f, 0.380f)));
 
         //rootNode.addChild(new AmbientLight(new Vector3f(0.1f, 0.3f, 0.1f)));
     }
 
     @Override
-    protected void Update() {
+    protected void Update(float delta) {
 
         al.getTransform().setLocalPosition(new Vector2f((float) Math.cos(System.currentTimeMillis() / 1000.0) * 1.5f, (float) Math.sin(System.currentTimeMillis() / 1000.0) * 1.5f));
 
